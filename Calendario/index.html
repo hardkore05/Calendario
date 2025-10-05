@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Calendario de Actividades</title>
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <!-- LOGIN -->
+  <div id="login">
+    <h2>Acceso al Sistema</h2>
+    <input type="number" id="cedula" placeholder="Ingrese su número de cédula" />
+    <button id="loginBtn">Ingresar</button>
+    <p id="error"></p>
+  </div>
+
+  <!-- APP -->
+  <div id="app" style="display:none;">
+    <header>
+      <h1>Gestión de Actividades</h1>
+      <button id="cerrarSesion">Cerrar sesión</button>
+    </header>
+
+    <main>
+      <section id="formulario">
+        <h2>Registrar Actividad</h2>
+        <form id="formActividad">
+          <div class="fila">
+            <label>Oficina:</label>
+            <select id="oficina" required>
+              <option value="">Seleccione...</option>
+              <option>Instancias de Participación</option>
+              <option>Salud</option>
+              <option>Educación</option>
+              <option>Subsidio Bono C</option>
+              <option>Casa Mujer Respiro</option>
+              <option>Casa del Adulto Mayor</option>
+            </select>
+          </div>
+
+          <div class="fila">
+            <label>Responsable:</label>
+            <input type="text" id="responsable" readonly />
+          </div>
+
+          <div class="fila">
+            <label>Fecha:</label>
+            <input type="date" id="fecha" required />
+          </div>
+
+          <div class="fila">
+            <label>Hora inicio:</label>
+            <input type="time" id="horaInicio" required />
+          </div>
+
+          <div class="fila">
+            <label>Hora fin:</label>
+            <input type="time" id="horaFin" required />
+          </div>
+
+          <div class="fila">
+            <label>Descripción:</label>
+            <textarea id="descripcion" rows="3" required></textarea>
+          </div>
+
+          <button type="submit" id="guardarBtn">Guardar Actividad</button>
+        </form>
+      </section>
+
+      <section id="calendario">
+        <div id="calendar"></div>
+        <div id="detalleDia" class="oculto">
+          <h3>Actividades del día seleccionado</h3>
+          <ul id="listaEventos"></ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/script.js"></script>
+</body>
+</html>
+
+
+

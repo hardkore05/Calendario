@@ -128,13 +128,19 @@ function mostrarEventosDelDia(fechaStr) {
   } else {
     eventos.forEach((e) => {
       const li = document.createElement("li");
-      li.textContent = e.title;
+
+      // Formatear horas de inicio y fin
+      const horaInicio = e.start
+        ? new Date(e.start).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })
+        : "";
+      const horaFin = e.end
+        ? new Date(e.end).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })
+        : "";
+
+      li.textContent = `${e.title} — ${horaInicio} a ${horaFin}`;
       listaEventos.appendChild(li);
     });
   }
 
   detalleDia.classList.remove("oculto");
 }
-
-
-

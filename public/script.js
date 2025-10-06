@@ -2,7 +2,7 @@
 const usuariosAutorizados = {
   "1014201517": "Daniel Rincón",
   "1019004954": "Edgar Forero",
-  "1031178064": "Sandra Tellez",
+  "1052380026": "Sandra Tellez",
   "1032506186": "Alexandra Bueno",
   "4567890123": "Deisy Villalba",
   "1014288855": "Alejandra Bermudez",

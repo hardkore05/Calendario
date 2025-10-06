@@ -5,8 +5,8 @@ const usuariosAutorizados = {
   "1031178064": "Sandra Tellez",
   "1032506186": "Alexandra Bueno",
   "4567890123": "Deisy Villalba",
-  "5678901234": "Alejandra Bermudez",
-  "6789012345": "Leandro Ariza",
+  "1014288855": "Alejandra Bermudez",
+  "1015405783": "Leandro Ariza",
   "1026285569": "Paula Salgado"
 };
 

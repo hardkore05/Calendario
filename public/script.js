@@ -8,12 +8,6 @@ const usuariosAutorizados = {
   "1014288855": "Alejandra Bermudez",
   "1015405783": "Leandro Ariza",
   "1026285569": "Paula Salgado"
-  "79880521": "Nicolas Rodriguez"
-  "1014264461": "Fernanda Villamil"
-  "5660739": "Cristian Perez"
-  "1057581626": "Samuel Camacho"
-  "80017445": "Fredy Amado"
-  "79803436": "Jheison Barrios"
 };
 
 document.getElementById("loginBtn").addEventListener("click", () => {
@@ -49,12 +43,6 @@ const responsables = {
   "Subsidio Bono C": "Deisy Villalba",
   "Casa Mujer Respiro": "Alejandra Bermudez",
   "Casa del Adulto Mayor": "Leandro Ariza",
-  "Cultura y Deporte": "Nicolas Rodriguez"
-  "Ambiente": "Fernanda Villamil"
-  "Desarrollo Economico": "Cristian Perez"
-  "Despacho - Asesor GDL": "Samuel Camacho"
-  "Enlace Social": "Fredy Amado"
-  "PYBA": "Jheison Barrios"
 };
 
 document.getElementById("oficina").addEventListener("change", (e) => {

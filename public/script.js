@@ -8,40 +8,43 @@ const usuariosAutorizados = {
   "1014288855": "Alejandra Bermudez",
   "1015405783": "Leandro Ariza",
   "1026285569": "Paula Salgado",
-  // Nuevos responsables
-  "79880521": "Nicolás Rodriguez",
+  "79880521": "Nicolás Rodríguez",
   "1014264461": "Fernanda Villamil",
   "5660739": "Cristian Pérez",
   "1057581626": "Samuel Camacho",
   "80017445": "Fredy Amado",
   "79803436": "Jheison Barrios",
-  "80772128": "Victor Hugo Huertas Prada" // Nuevo responsable
+  "80772128": "Victor Hugo Huertas Prada"
 };
+
+let usuarioActual = null;
 
 document.getElementById("loginBtn").addEventListener("click", () => {
   const cedula = document.getElementById("cedula").value.trim();
   const nombreUsuario = usuariosAutorizados[cedula];
 
   if (nombreUsuario) {
+    usuarioActual = { cedula, nombre: nombreUsuario };
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";
-    document.querySelector("header h1").textContent =
-      `Bienvenido, ${nombreUsuario}`;
+    document.querySelector("header h1").textContent = `Bienvenido, ${nombreUsuario}`;
 
-    // Guardar cédula en sesión para permisos
-    sessionStorage.setItem("cedulaUsuario", cedula);
-
-    // Controlar visibilidad de botones según permisos
-    controlarPermisos();
+    // Mostrar botones de validación solo para Victor o Samuel
+    const acciones = document.getElementById("accionesValidacion");
+    if (cedula === "80772128" || cedula === "1057581626") {
+      acciones.style.display = "block";
+    } else {
+      acciones.style.display = "none";
+    }
   } else {
     document.getElementById("error").textContent = "Cédula no autorizada.";
   }
 });
 
 document.getElementById("cerrarSesion").addEventListener("click", () => {
+  usuarioActual = null;
   document.getElementById("login").style.display = "block";
   document.getElementById("app").style.display = "none";
-  sessionStorage.removeItem("cedulaUsuario");
 });
 
 // --- RESPONSABLES ---
@@ -52,35 +55,24 @@ const responsables = {
   "Subsidio Bono C": "Deisy Villalba",
   "Casa Mujer Respiro": "Alejandra Bermudez",
   "Casa del Adulto Mayor": "Leandro Ariza",
-  "Cultura y deporte": "Nicolás Rodriguez",
+  "Cultura y deporte": "Nicolás Rodríguez",
   "Ambiente": "Fernanda Villamil",
   "Desarrollo económico": "Cristian Pérez",
   "Area de Gestión de Desarrollo Local": "Samuel Camacho",
   "Enlace Social": "Fredy Amado",
   "PYBA": "Jheison Barrios",
-  "Alcaldía Local de Engativá": "Victor Hugo Huertas Prada" // Nueva oficina
+  "Alcaldía Local de Engativá": "Victor Hugo Huertas Prada"
 };
 
 document.getElementById("oficina").addEventListener("change", (e) => {
   document.getElementById("responsable").value = responsables[e.target.value] || "";
 });
 
-// --- PERMISOS ESPECIALES ---
-// Solo estos usuarios pueden aceptar o rechazar actividades
-const usuariosValidador = ["80772128", "1057581626"];
-
-function controlarPermisos() {
-  const cedula = sessionStorage.getItem("cedulaUsuario");
-  const botonesValidacion = document.querySelectorAll(".btn-validar");
-
-  botonesValidacion.forEach(btn => {
-    btn.style.display = usuariosValidador.includes(cedula) ? "inline-block" : "none";
-  });
-}
 // --- CALENDARIO ---
 let calendarEl = document.getElementById("calendar");
 let detalleDia = document.getElementById("detalleDia");
 let listaEventos = document.getElementById("listaEventos");
+let eventoSeleccionado = null;
 
 let calendar = new FullCalendar.Calendar(calendarEl, {
   initialView: "dayGridMonth",
@@ -90,10 +82,8 @@ let calendar = new FullCalendar.Calendar(calendarEl, {
   height: "auto",
   dateClick: (info) => mostrarEventosDelDia(info.dateStr),
   eventClick: function (info) {
-    if (confirm("¿Deseas eliminar este evento?")) {
-      info.event.remove();
-      guardarEventos();
-    }
+    eventoSeleccionado = info.event;
+    mostrarEventosDelDia(info.event.startStr.split("T")[0]);
   },
   eventChange: guardarEventos,
 });
@@ -113,6 +103,7 @@ function guardarEventos() {
     title: ev.title,
     start: ev.startStr,
     end: ev.endStr,
+    color: ev.backgroundColor || "",
   }));
   localStorage.setItem("eventos", JSON.stringify(eventos));
 }
@@ -137,6 +128,7 @@ document.getElementById("formActividad").addEventListener("submit", (e) => {
     title: `${oficina} (${responsable}) - ${descripcion}`,
     start: `${fecha}T${horaInicio}`,
     end: `${fecha}T${horaFin}`,
+    color: "#3788d8", // color base (azul)
   };
 
   calendar.addEvent(evento);
@@ -153,11 +145,11 @@ function mostrarEventosDelDia(fechaStr) {
 
   if (eventos.length === 0) {
     listaEventos.innerHTML = "<li>No hay actividades para este día.</li>";
+    eventoSeleccionado = null;
   } else {
     eventos.forEach((e) => {
       const li = document.createElement("li");
 
-      // Formatear horas de inicio y fin
       const horaInicio = e.start
         ? new Date(e.start).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })
         : "";
@@ -165,10 +157,45 @@ function mostrarEventosDelDia(fechaStr) {
         ? new Date(e.end).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })
         : "";
 
-      li.textContent = `${e.title} — ${horaInicio} a ${horaFin}`;
+      let estado = "";
+      if (e.backgroundColor === "green") estado = " [Aceptada]";
+      else if (e.backgroundColor === "red") estado = " [Rechazada]";
+
+      li.textContent = `${e.title}${estado} — ${horaInicio} a ${horaFin}`;
+      li.addEventListener("click", () => (eventoSeleccionado = e));
       listaEventos.appendChild(li);
     });
   }
 
   detalleDia.classList.remove("oculto");
 }
+
+// --- VALIDAR ACTIVIDAD (ACEPTAR / RECHAZAR) ---
+document.getElementById("btnAceptar").addEventListener("click", () => {
+  if (eventoSeleccionado) {
+    if (!eventoSeleccionado.title.includes("[Aceptada]")) {
+      eventoSeleccionado.setProp("title", `${eventoSeleccionado.title} [Aceptada]`);
+    }
+    eventoSeleccionado.setProp("backgroundColor", "green");
+    guardarEventos();
+    mostrarEventosDelDia(eventoSeleccionado.startStr.split("T")[0]);
+    alert("✅ Actividad aceptada.");
+  } else {
+    alert("Seleccione una actividad del listado.");
+  }
+});
+
+document.getElementById("btnRechazar").addEventListener("click", () => {
+  if (eventoSeleccionado) {
+    if (!eventoSeleccionado.title.includes("[Rechazada]")) {
+      eventoSeleccionado.setProp("title", `${eventoSeleccionado.title} [Rechazada]`);
+    }
+    eventoSeleccionado.setProp("backgroundColor", "red");
+    guardarEventos();
+    mostrarEventosDelDia(eventoSeleccionado.startStr.split("T")[0]);
+    alert("❌ Actividad rechazada.");
+  } else {
+    alert("Seleccione una actividad del listado.");
+  }
+});
+

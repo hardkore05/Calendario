@@ -2,34 +2,38 @@
 // USUARIOS AUTORIZADOS
 // =========================
 const usuarios = {
-  "80772128": "Victor Hugo Huertas Prada",
-  "1057581626": "Samuel Camacho",
-  "1014201517": "Daniel Rincón",
-  "1031178064": "Sandra Téllez",
-  "1032506186": "Alexandra Bueno",
-  "1019004954": "Edgar Forero"
+  "80772128": { nombre: "Víctor Hugo Huertas Prada", oficina: "Alcaldía Local de Engativá", rol: "admin" },
+  "1057581626": { nombre: "Samuel Camacho", oficina: "Área de Gestión de Desarrollo Local", rol: "admin" },
+  "1014201517": { nombre: "Daniel Rincón", oficina: "Cultura y Deporte", rol: "user" },
+  "1019004954": { nombre: "Edgar Forero", oficina: "Instancias de Participación", rol: "user" },
+  "1052380026": { nombre: "Sandra Tellez", oficina: "Salud", rol: "user" },
+  "1032506186": { nombre: "Alexandra Bueno", oficina: "Educación", rol: "user" },
+  "52046781": { nombre: "Deisy Villalba", oficina: "Subsidio Bono C", rol: "user" },
+  "1014288855": { nombre: "Alejandra Bermudez", oficina: "Casa Mujer Respiro", rol: "user" },
+  "1015405783": { nombre: "Leandro Ariza", oficina: "Casa del Adulto Mayor", rol: "user" },
+  "79880521": { nombre: "Nicolás Rodríguez", oficina: "Cultura y Deporte", rol: "user" },
+  "1014264461": { nombre: "Fernanda Villamil", oficina: "Ambiente", rol: "user" },
+  "5660739": { nombre: "Cristian Pérez", oficina: "Desarrollo Económico", rol: "user" },
+  "80017445": { nombre: "Fredy Amado", oficina: "Enlace Social", rol: "user" },
+  "79803436": { nombre: "Jheison Barrios", oficina: "PYBA", rol: "user" },
+  "1026285569": { nombre: "Paula Salgado", oficina: "Enlace de Participación", rol: "user" }
 };
 
-// Responsables con privilegios
-const responsablesAdmin = ["80772128", "1057581626"];
-
-let usuarioActual = null;
-let calendario;
+let usuario = null;
 
 // =========================
 // LOGIN
 // =========================
 document.getElementById("loginBtn").addEventListener("click", () => {
   const cedula = document.getElementById("cedula").value.trim();
-  const error = document.getElementById("error");
+  usuario = usuarios[cedula];
 
-  if (usuarios[cedula]) {
-    usuarioActual = cedula;
+  if (usuario) {
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";
-    document.getElementById("responsable").value = usuarios[cedula];
+    document.querySelector("header h1").textContent = `Bienvenido, ${usuario.nombre}`;
   } else {
-    error.textContent = "Cédula no registrada.";
+    document.getElementById("error").textContent = "Cédula no autorizada.";
   }
 });
 
@@ -37,213 +41,168 @@ document.getElementById("loginBtn").addEventListener("click", () => {
 // CERRAR SESIÓN
 // =========================
 document.getElementById("cerrarSesion").addEventListener("click", () => {
-  usuarioActual = null;
-  document.getElementById("app").style.display = "none";
-  document.getElementById("login").style.display = "block";
-  document.getElementById("cedula").value = "";
+  location.reload();
+});
+
+// =========================
+// RESPONSABLES DE OFICINA
+// =========================
+const responsables = {
+  "Instancias de Participación": "Edgar Forero",
+  "Salud": "Sandra Tellez",
+  "Educación": "Alexandra Bueno",
+  "Subsidio Bono C": "Deisy Villalba",
+  "Casa Mujer Respiro": "Alejandra Bermudez",
+  "Casa del Adulto Mayor": "Leandro Ariza",
+  "Cultura y Deporte": "Nicolás Rodríguez",
+  "Ambiente": "Fernanda Villamil",
+  "Desarrollo Económico": "Cristian Pérez",
+  "Área de Gestión de Desarrollo Local": "Samuel Camacho",
+  "Enlace Social": "Fredy Amado",
+  "PYBA": "Jheison Barrios",
+  "Alcaldía Local de Engativá": "Víctor Hugo Huertas Prada",
+  "Enlace de Participación": "Paula Salgado"
+};
+
+document.getElementById("oficina").addEventListener("change", e => {
+  document.getElementById("responsable").value = responsables[e.target.value] || "";
 });
 
 // =========================
 // INICIALIZAR CALENDARIO
 // =========================
-document.addEventListener("DOMContentLoaded", function () {
-  const calendarEl = document.getElementById("calendar");
-
-  calendario = new FullCalendar.Calendar(calendarEl, {
-    initialView: "dayGridMonth",
-    locale: "es",
-    editable: false,
-    eventClick: mostrarDetalleEvento,
-    events: JSON.parse(localStorage.getItem("actividades")) || []
-  });
-
-  calendario.render();
+const calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
+  initialView: "dayGridMonth",
+  locale: "es",
+  selectable: true,
+  height: "auto",
+  dateClick: info => mostrarEventosDelDia(info.dateStr)
 });
+
+calendar.render();
+cargarEventos();
 
 // =========================
 // GUARDAR ACTIVIDAD
 // =========================
-document.getElementById("formActividad").addEventListener("submit", function (e) {
+document.getElementById("formActividad").addEventListener("submit", e => {
   e.preventDefault();
 
-  const nuevaActividad = {
-    id: Date.now().toString(),
-    title: document.getElementById("descripcion").value,
-    start: document.getElementById("fecha").value,
-    extendedProps: {
-      oficina: document.getElementById("oficina").value,
-      responsable: document.getElementById("responsable").value,
-      horaInicio: document.getElementById("horaInicio").value,
-      horaFin: document.getElementById("horaFin").value,
-      meta: document.getElementById("meta").value,
-      participantes: document.getElementById("participantes").value,
-      poblacion: document.getElementById("poblacion").value,
-      ubicacion: document.getElementById("ubicacion").value,
-      requerimientos: document.getElementById("requerimientos").value,
-      estado: "Pendiente",
-      aprobadoPor: null,
-      fechaRegistro: new Date().toLocaleString()
-    }
+  const evento = {
+    id: Date.now(),
+    title: `${document.getElementById("oficina").value} - ${document.getElementById("descripcion").value}`,
+    start: `${document.getElementById("fecha").value}T${document.getElementById("horaInicio").value}`,
+    end: `${document.getElementById("fecha").value}T${document.getElementById("horaFin").value}`,
+    meta: document.getElementById("meta").value,
+    participantes: document.getElementById("participantes").value,
+    poblacion: document.getElementById("poblacion").value,
+    ubicacion: document.getElementById("ubicacion").value,
+    requerimientos: document.getElementById("requerimientos").value,
+    oficina: document.getElementById("oficina").value,
+    responsable: document.getElementById("responsable").value,
+    creadoPor: usuario.nombre,
+    fechaRegistro: new Date().toLocaleString("es-CO"),
+    estado: "Pendiente",
+    evaluado: false
   };
 
-  let actividades = JSON.parse(localStorage.getItem("actividades")) || [];
-  actividades.push(nuevaActividad);
-  localStorage.setItem("actividades", JSON.stringify(actividades));
+  const eventos = JSON.parse(localStorage.getItem("eventos") || "[]");
+  eventos.push(evento);
+  localStorage.setItem("eventos", JSON.stringify(eventos));
 
-  calendario.addEvent(nuevaActividad);
-  alert("Actividad registrada correctamente.");
-
-  this.reset();
+  calendar.addEvent({ title: evento.title, start: evento.start, end: evento.end });
+  e.target.reset();
+  alert("Actividad guardada exitosamente");
 });
 
 // =========================
-// MOSTRAR DETALLE DEL EVENTO
+// MOSTRAR EVENTOS DEL DÍA
 // =========================
-function mostrarDetalleEvento(info) {
-  const evento = info.event;
-  const props = evento.extendedProps;
+function mostrarEventosDelDia(fechaStr) {
   const lista = document.getElementById("listaEventos");
+  const eventos = JSON.parse(localStorage.getItem("eventos") || "[]")
+    .filter(e => e.start.startsWith(fechaStr));
+
   lista.innerHTML = "";
+  if (eventos.length === 0) {
+    lista.innerHTML = "<li>No hay actividades para este día.</li>";
+  } else {
+    eventos.forEach(e => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <b>${e.title}</b><br>
+        Responsable: ${e.responsable}<br>
+        Meta: ${e.meta || "-"}<br>
+        Participantes: ${e.participantes || "-"}<br>
+        Población: ${e.poblacion || "-"}<br>
+        Ubicación: ${e.ubicacion || "-"}<br>
+        Requerimientos: ${e.requerimientos || "-"}<br>
+        Registrado por: ${e.creadoPor}<br>
+        Fecha registro: ${e.fechaRegistro}<br>
+        Estado: <b>${e.estado}</b>`;
 
-  const li = document.createElement("li");
-  li.innerHTML = `
-    <strong>${evento.title}</strong><br>
-    📅 Fecha: ${evento.startStr}<br>
-    🏢 Oficina: ${props.oficina}<br>
-    👤 Responsable: ${props.responsable}<br>
-    🕒 ${props.horaInicio} - ${props.horaFin}<br>
-    🎯 <b>META:</b> ${props.meta}<br>
-    👥 <b>PARTICIPANTES:</b> ${props.participantes}<br>
-    🧍‍♂️ <b>POBLACIÓN BENEFICIADA:</b> ${props.poblacion}<br>
-    📍 <b>UBICACIÓN:</b> ${props.ubicacion}<br>
-    ⚙️ <b>REQUERIMIENTOS:</b> ${props.requerimientos}<br>
-    🗓️ <b>Registrado el:</b> ${props.fechaRegistro}<br>
-    📌 <b>Estado:</b> ${props.estado}
-    ${props.aprobadoPor ? `<br>✅ ${props.aprobadoPor}` : ""}
-  `;
+      // Botones de administración
+      if (usuario.rol === "admin") {
+        const divBtns = document.createElement("div");
+        divBtns.className = "botones-admin";
 
-  // Botones para administradores
-  if (responsablesAdmin.includes(usuarioActual)) {
-    const aceptarBtn = document.createElement("button");
-    aceptarBtn.textContent = "Aceptar";
-    aceptarBtn.onclick = () => cambiarEstado(evento.id, "Aceptada");
+        const btnAceptar = document.createElement("button");
+        btnAceptar.textContent = "Aceptar";
+        const btnRechazar = document.createElement("button");
+        btnRechazar.textContent = "Rechazar";
+        const btnEliminar = document.createElement("button");
+        btnEliminar.textContent = "Eliminar";
 
-    const rechazarBtn = document.createElement("button");
-    rechazarBtn.textContent = "Rechazar";
-    rechazarBtn.onclick = () => cambiarEstado(evento.id, "Rechazada");
+        if (!e.evaluado) {
+          btnAceptar.onclick = () => cambiarEstado(e.id, "Aceptado");
+          btnRechazar.onclick = () => cambiarEstado(e.id, "Rechazado");
+        } else {
+          btnAceptar.disabled = true;
+          btnRechazar.disabled = true;
+        }
 
-    const borrarBtn = document.createElement("button");
-    borrarBtn.textContent = "Eliminar";
-    borrarBtn.onclick = () => eliminarActividad(evento.id);
+        btnEliminar.onclick = () => eliminarEvento(e.id);
 
-    // Desactivar si ya fue aceptada o rechazada
-    if (props.estado !== "Pendiente") {
-      aceptarBtn.disabled = true;
-      rechazarBtn.disabled = true;
-    }
+        divBtns.append(btnAceptar, btnRechazar, btnEliminar);
+        li.appendChild(divBtns);
+      }
 
-    li.appendChild(document.createElement("br"));
-    li.appendChild(aceptarBtn);
-    li.appendChild(rechazarBtn);
-    li.appendChild(borrarBtn);
+      lista.appendChild(li);
+    });
   }
 
-  lista.appendChild(li);
   document.getElementById("detalleDia").classList.remove("oculto");
 }
 
 // =========================
-// CAMBIAR ESTADO
+// FUNCIONES AUXILIARES
 // =========================
+function cargarEventos() {
+  const eventos = JSON.parse(localStorage.getItem("eventos") || "[]");
+  eventos.forEach(e => calendar.addEvent({ title: e.title, start: e.start, end: e.end }));
+}
+
 function cambiarEstado(id, nuevoEstado) {
-  let actividades = JSON.parse(localStorage.getItem("actividades")) || [];
-  actividades = actividades.map(a => {
-    if (a.id === id && a.extendedProps.estado === "Pendiente") {
-      a.extendedProps.estado = nuevoEstado;
-      a.extendedProps.aprobadoPor = usuarios[usuarioActual];
-    }
-    return a;
-  });
-  localStorage.setItem("actividades", JSON.stringify(actividades));
-  actualizarCalendario();
+  const eventos = JSON.parse(localStorage.getItem("eventos"));
+  const evento = eventos.find(ev => ev.id === id);
+  if (evento && !evento.evaluado) {
+    evento.estado = nuevoEstado;
+    evento.evaluado = true;
+    localStorage.setItem("eventos", JSON.stringify(eventos));
+    alert(`Actividad ${nuevoEstado}`);
+    location.reload();
+  }
 }
 
-// =========================
-// ELIMINAR ACTIVIDAD
-// =========================
-function eliminarActividad(id) {
+function eliminarEvento(id) {
   if (!confirm("¿Desea eliminar esta actividad?")) return;
-
-  let actividades = JSON.parse(localStorage.getItem("actividades")) || [];
-  actividades = actividades.filter(a => a.id !== id);
-  localStorage.setItem("actividades", JSON.stringify(actividades));
-  actualizarCalendario();
+  let eventos = JSON.parse(localStorage.getItem("eventos"));
+  eventos = eventos.filter(e => e.id !== id);
+  localStorage.setItem("eventos", JSON.stringify(eventos));
+  alert("Actividad eliminada");
+  location.reload();
 }
 
-// =========================
-// EXPORTAR A EXCEL
-// =========================
-document.getElementById("exportExcel").addEventListener("click", () => {
-  const actividades = JSON.parse(localStorage.getItem("actividades")) || [];
-  if (actividades.length === 0) return alert("No hay datos para exportar.");
-
-  const filas = actividades.map(a => ({
-    Fecha: a.start,
-    Oficina: a.extendedProps.oficina,
-    Responsable: a.extendedProps.responsable,
-    Meta: a.extendedProps.meta,
-    Participantes: a.extendedProps.participantes,
-    Poblacion: a.extendedProps.poblacion,
-    Ubicacion: a.extendedProps.ubicacion,
-    Requerimientos: a.extendedProps.requerimientos,
-    Estado: a.extendedProps.estado,
-    AprobadoPor: a.extendedProps.aprobadoPor || "",
-    FechaRegistro: a.extendedProps.fechaRegistro
-  }));
-
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.json_to_sheet(filas);
-  XLSX.utils.book_append_sheet(wb, ws, "Actividades");
-  XLSX.writeFile(wb, "actividades.xlsx");
-});
-
-// =========================
-// EXPORTAR A PDF
-// =========================
-document.getElementById("exportPDF").addEventListener("click", () => {
-  const actividades = JSON.parse(localStorage.getItem("actividades")) || [];
-  if (actividades.length === 0) return alert("No hay datos para exportar.");
-
-  const doc = new jsPDF();
-  doc.setFontSize(12);
-  doc.text("Reporte de Actividades", 14, 15);
-
-  const filas = actividades.map(a => [
-    a.start,
-    a.extendedProps.oficina,
-    a.extendedProps.responsable,
-    a.extendedProps.meta,
-    a.extendedProps.estado
-  ]);
-
-  doc.autoTable({
-    head: [["Fecha", "Oficina", "Responsable", "Meta", "Estado"]],
-    body: filas,
-    startY: 25,
-  });
-
-  doc.save("actividades.pdf");
-});
-
-// =========================
-// REFRESCAR CALENDARIO
-// =========================
-function actualizarCalendario() {
-  calendario.removeAllEvents();
-  const actividades = JSON.parse(localStorage.getItem("actividades")) || [];
-  actividades.forEach(a => calendario.addEvent(a));
-  alert("Registro actualizado.");
-}
 
 
 

@@ -6,74 +6,37 @@
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f8f9fa;
-      margin: 0;
-      padding: 0;
-    }
-    #login, #app {
-      max-width: 900px;
-      margin: 20px auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h1, h2 {
-      text-align: center;
-    }
-    .fila {
-      margin-bottom: 10px;
-    }
-    label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 6px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 8px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    #calendar {
-      margin-top: 20px;
-    }
-    .acciones button {
-      margin-right: 5px;
-    }
+    body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; }
+    header { background: #004c97; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+    h1 { font-size: 18px; margin: 0; }
+    main { display: flex; flex-wrap: wrap; padding: 10px; gap: 10px; }
+    section { background: white; border-radius: 8px; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex: 1; min-width: 340px; }
+    form .fila { display: flex; flex-direction: column; margin-bottom: 8px; }
+    label { font-weight: bold; margin-bottom: 3px; font-size: 13px; }
+    input, select, textarea, button { font-size: 13px; padding: 5px; }
+    button { background: #004c97; color: white; border: none; cursor: pointer; border-radius: 5px; padding: 7px; }
+    button:hover { background: #006ad1; }
+    #login { text-align: center; padding: 40px; }
+    #login input { margin: 5px; padding: 5px; width: 200px; }
+    #error { color: red; }
+    .oculto { display: none; }
+    .botones-admin button { margin-right: 5px; }
   </style>
 </head>
 <body>
-
   <!-- LOGIN -->
   <div id="login">
     <h2>Acceso al Sistema</h2>
     <input type="number" id="cedula" placeholder="Ingrese su número de cédula" />
     <button id="loginBtn">Ingresar</button>
-    <p id="error" style="color:red;"></p>
+    <p id="error"></p>
   </div>
 
   <!-- APP -->
   <div id="app" style="display:none;">
-    <header style="display:flex; justify-content:space-between; align-items:center;">
+    <header>
       <h1>Gestión de Actividades</h1>
-      <div>
-        <span id="usuarioActivo" style="font-weight:bold;"></span>
-        <button id="cerrarSesion">Cerrar sesión</button>
-      </div>
+      <button id="cerrarSesion">Cerrar sesión</button>
     </header>
 
     <main>
@@ -90,7 +53,13 @@
               <option>Subsidio Bono C</option>
               <option>Casa Mujer Respiro</option>
               <option>Casa del Adulto Mayor</option>
-              <option>Alcaldia Local de Engativá</option>
+              <option>Cultura y Deporte</option>
+              <option>Ambiente</option>
+              <option>Desarrollo Económico</option>
+              <option>Área de Gestión de Desarrollo Local</option>
+              <option>Enlace Social</option>
+              <option>PYBA</option>
+              <option>Alcaldía Local de Engativá</option>
             </select>
           </div>
 
@@ -99,14 +68,15 @@
             <input type="text" id="responsable" readonly />
           </div>
 
+          <div class="fila"><label>Meta:</label><input type="text" id="meta"></div>
+          <div class="fila"><label>Participantes:</label><input type="text" id="participantes"></div>
+          <div class="fila"><label>Población Beneficiada:</label><input type="text" id="poblacion"></div>
+          <div class="fila"><label>Ubicación (Dirección - Lugar):</label><input type="text" id="ubicacion"></div>
+          <div class="fila"><label>Requerimientos Logísticos:</label><textarea id="requerimientos"></textarea></div>
+
           <div class="fila"><label>Fecha:</label><input type="date" id="fecha" required /></div>
           <div class="fila"><label>Hora inicio:</label><input type="time" id="horaInicio" required /></div>
           <div class="fila"><label>Hora fin:</label><input type="time" id="horaFin" required /></div>
-          <div class="fila"><label>Meta:</label><input type="text" id="meta" required /></div>
-          <div class="fila"><label>Participantes:</label><input type="text" id="participantes" required /></div>
-          <div class="fila"><label>Población Beneficiada:</label><input type="text" id="poblacion" required /></div>
-          <div class="fila"><label>Ubicación (Dirección - Lugar):</label><input type="text" id="ubicacion" required /></div>
-          <div class="fila"><label>Requerimientos Logísticos:</label><textarea id="logistica" rows="2" required></textarea></div>
           <div class="fila"><label>Descripción:</label><textarea id="descripcion" rows="2" required></textarea></div>
 
           <button type="submit" id="guardarBtn">Guardar Actividad</button>
@@ -115,7 +85,7 @@
 
       <section id="calendario">
         <div id="calendar"></div>
-        <div id="detalleDia">
+        <div id="detalleDia" class="oculto">
           <h3>Actividades del día seleccionado</h3>
           <ul id="listaEventos"></ul>
         </div>
@@ -124,155 +94,186 @@
   </div>
 
   <script>
+    // ===== USUARIOS AUTORIZADOS =====
     const usuarios = {
-      "80772128": { nombre: "Víctor Hugo Huertas Prada", oficina: "Alcaldia Local de Engativá", rol: "admin" },
-      "1057581626": { nombre: "Samuel Camacho", oficina: "Alcaldia Local de Engativá", rol: "admin" },
-      "1234567890": { nombre: "María López", oficina: "Instancias de Participación", rol: "user" }
+      "80772128": { nombre: "Víctor Hugo Huertas Prada", oficina: "Alcaldía Local de Engativá", rol: "admin" },
+      "1057581626": { nombre: "Samuel Camacho", oficina: "Área de Gestión de Desarrollo Local", rol: "admin" },
+      "1014201517": { nombre: "Daniel Rincón", oficina: "Cultura y Deporte", rol: "user" },
+      "1019004954": { nombre: "Edgar Forero", oficina: "Instancias de Participación", rol: "user" },
+      "1052380026": { nombre: "Sandra Tellez", oficina: "Salud", rol: "user" },
+      "1032506186": { nombre: "Alexandra Bueno", oficina: "Educación", rol: "user" },
+      "52046781": { nombre: "Deisy Villalba", oficina: "Subsidio Bono C", rol: "user" },
+      "1014288855": { nombre: "Alejandra Bermudez", oficina: "Casa Mujer Respiro", rol: "user" },
+      "1015405783": { nombre: "Leandro Ariza", oficina: "Casa del Adulto Mayor", rol: "user" },
+      "79880521": { nombre: "Nicolás Rodríguez", oficina: "Cultura y Deporte", rol: "user" },
+      "1014264461": { nombre: "Fernanda Villamil", oficina: "Ambiente", rol: "user" },
+      "5660739": { nombre: "Cristian Pérez", oficina: "Desarrollo Económico", rol: "user" },
+      "80017445": { nombre: "Fredy Amado", oficina: "Enlace Social", rol: "user" },
+      "79803436": { nombre: "Jheison Barrios", oficina: "PYBA", rol: "user" }
     };
 
-    let usuarioActivo = null;
-    const login = document.getElementById("login");
-    const app = document.getElementById("app");
-    const error = document.getElementById("error");
-    const cedulaInput = document.getElementById("cedula");
-    const responsableInput = document.getElementById("responsable");
-    const oficinaSelect = document.getElementById("oficina");
-    const usuarioSpan = document.getElementById("usuarioActivo");
+    let usuario = null;
 
+    // ===== LOGIN =====
     document.getElementById("loginBtn").addEventListener("click", () => {
-      const cedula = cedulaInput.value.trim();
-      if (usuarios[cedula]) {
-        usuarioActivo = { cedula, ...usuarios[cedula] };
-        login.style.display = "none";
-        app.style.display = "block";
-        responsableInput.value = usuarioActivo.nombre;
-        usuarioSpan.textContent = usuarioActivo.nombre;
+      const cedula = document.getElementById("cedula").value.trim();
+      usuario = usuarios[cedula];
+      if (usuario) {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("app").style.display = "block";
+        document.querySelector("header h1").textContent = `Bienvenido, ${usuario.nombre}`;
       } else {
-        error.textContent = "Cédula no registrada.";
+        document.getElementById("error").textContent = "Cédula no autorizada.";
       }
     });
 
-    document.getElementById("cerrarSesion").addEventListener("click", () => {
-      usuarioActivo = null;
-      app.style.display = "none";
-      login.style.display = "block";
-      cedulaInput.value = "";
+    document.getElementById("cerrarSesion").addEventListener("click", () => location.reload());
+
+    // ===== RESPONSABLES =====
+    const responsables = {
+      "Instancias de Participación": "Edgar Forero",
+      "Salud": "Sandra Tellez",
+      "Educación": "Alexandra Bueno",
+      "Subsidio Bono C": "Deisy Villalba",
+      "Casa Mujer Respiro": "Alejandra Bermudez",
+      "Casa del Adulto Mayor": "Leandro Ariza",
+      "Cultura y Deporte": "Nicolás Rodríguez",
+      "Ambiente": "Fernanda Villamil",
+      "Desarrollo Económico": "Cristian Pérez",
+      "Área de Gestión de Desarrollo Local": "Samuel Camacho",
+      "Enlace Social": "Fredy Amado",
+      "PYBA": "Jheison Barrios",
+      "Alcaldía Local de Engativá": "Víctor Hugo Huertas Prada"
+    };
+
+    document.getElementById("oficina").addEventListener("change", e => {
+      document.getElementById("responsable").value = responsables[e.target.value] || "";
     });
 
-    oficinaSelect.addEventListener("change", () => {
-      if (usuarioActivo) responsableInput.value = usuarioActivo.nombre;
-    });
-
-    const calendarEl = document.getElementById("calendar");
-    const calendar = new FullCalendar.Calendar(calendarEl, {
+    // ===== CALENDARIO =====
+    const calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
       initialView: "dayGridMonth",
       locale: "es",
-      dateClick: (info) => mostrarEventos(info.dateStr),
+      selectable: true,
+      height: "auto",
+      dateClick: info => mostrarEventosDelDia(info.dateStr)
     });
+
     calendar.render();
+    cargarEventos();
 
-    function cargarActividades() {
-      return JSON.parse(localStorage.getItem("actividades") || "[]");
-    }
-
-    function guardarActividades(actividades) {
-      localStorage.setItem("actividades", JSON.stringify(actividades));
-      actualizarCalendario();
-    }
-
-    function actualizarCalendario() {
-      const actividades = cargarActividades();
-      calendar.removeAllEvents();
-      actividades.forEach(a => {
-        calendar.addEvent({
-          title: `${a.responsable} - ${a.descripcion}`,
-          start: a.fecha
-        });
-      });
-    }
-
-    function mostrarEventos(fecha) {
-      const lista = document.getElementById("listaEventos");
-      lista.innerHTML = "";
-      const actividades = cargarActividades().filter(a => a.fecha === fecha);
-
-      actividades.forEach((a, i) => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-          <b>${a.descripcion}</b> (${a.horaInicio} - ${a.horaFin})<br>
-          <i>${a.meta}</i><br>
-          <b>Participantes:</b> ${a.participantes}<br>
-          <b>Ubicación:</b> ${a.ubicacion}<br>
-          <b>Estado:</b> ${a.estado || "Pendiente"}<br>
-        `;
-        const div = document.createElement("div");
-        div.classList.add("acciones");
-
-        if (usuarioActivo.rol === "admin") {
-          const aceptar = document.createElement("button");
-          aceptar.textContent = "Aceptar";
-          aceptar.disabled = a.estado && a.estado !== "Pendiente";
-          aceptar.onclick = () => cambiarEstado(a, "Aceptada");
-
-          const rechazar = document.createElement("button");
-          rechazar.textContent = "Rechazar";
-          rechazar.disabled = a.estado && a.estado !== "Pendiente";
-          rechazar.onclick = () => cambiarEstado(a, "Rechazada");
-
-          const eliminar = document.createElement("button");
-          eliminar.textContent = "Eliminar";
-          eliminar.onclick = () => eliminarActividad(a);
-
-          div.append(aceptar, rechazar, eliminar);
-        }
-        li.append(div);
-        lista.append(li);
-      });
-    }
-
-    function cambiarEstado(actividad, nuevoEstado) {
-      const actividades = cargarActividades();
-      const index = actividades.findIndex(a => a.fecha === actividad.fecha && a.descripcion === actividad.descripcion);
-      if (index !== -1) {
-        actividades[index].estado = nuevoEstado;
-        guardarActividades(actividades);
-        mostrarEventos(actividad.fecha);
-      }
-    }
-
-    function eliminarActividad(actividad) {
-      const actividades = cargarActividades();
-      const filtradas = actividades.filter(a => !(a.fecha === actividad.fecha && a.descripcion === actividad.descripcion));
-      guardarActividades(filtradas);
-      mostrarEventos(actividad.fecha);
-    }
-
-    document.getElementById("formActividad").addEventListener("submit", (e) => {
+    // ===== GUARDAR ACTIVIDAD =====
+    document.getElementById("formActividad").addEventListener("submit", e => {
       e.preventDefault();
-      const actividad = {
-        oficina: oficinaSelect.value,
-        responsable: responsableInput.value,
-        fecha: document.getElementById("fecha").value,
-        horaInicio: document.getElementById("horaInicio").value,
-        horaFin: document.getElementById("horaFin").value,
-        descripcion: document.getElementById("descripcion").value,
+
+      const evento = {
+        id: Date.now(),
+        title: `${document.getElementById("oficina").value} - ${document.getElementById("descripcion").value}`,
+        start: `${document.getElementById("fecha").value}T${document.getElementById("horaInicio").value}`,
+        end: `${document.getElementById("fecha").value}T${document.getElementById("horaFin").value}`,
         meta: document.getElementById("meta").value,
         participantes: document.getElementById("participantes").value,
         poblacion: document.getElementById("poblacion").value,
         ubicacion: document.getElementById("ubicacion").value,
-        logistica: document.getElementById("logistica").value,
-        estado: "Pendiente"
+        requerimientos: document.getElementById("requerimientos").value,
+        oficina: document.getElementById("oficina").value,
+        responsable: document.getElementById("responsable").value,
+        creadoPor: usuario.nombre,
+        fechaRegistro: new Date().toLocaleString("es-CO"),
+        estado: "Pendiente",
+        evaluado: false
       };
 
-      const actividades = cargarActividades();
-      actividades.push(actividad);
-      guardarActividades(actividades);
+      const eventos = JSON.parse(localStorage.getItem("eventos") || "[]");
+      eventos.push(evento);
+      localStorage.setItem("eventos", JSON.stringify(eventos));
+
+      calendar.addEvent({ title: evento.title, start: evento.start, end: evento.end });
       e.target.reset();
-      actualizarCalendario();
-      alert("Actividad guardada exitosamente.");
+      alert("Actividad guardada exitosamente");
     });
 
-    actualizarCalendario();
+    // ===== MOSTRAR EVENTOS DEL DÍA =====
+    function mostrarEventosDelDia(fechaStr) {
+      const lista = document.getElementById("listaEventos");
+      const eventos = JSON.parse(localStorage.getItem("eventos") || "[]")
+        .filter(e => e.start.startsWith(fechaStr));
+
+      lista.innerHTML = "";
+      if (eventos.length === 0) {
+        lista.innerHTML = "<li>No hay actividades para este día.</li>";
+      } else {
+        eventos.forEach(e => {
+          const li = document.createElement("li");
+          li.innerHTML = `<b>${e.title}</b><br>
+            Responsable: ${e.responsable}<br>
+            Meta: ${e.meta || "-"}<br>
+            Participantes: ${e.participantes || "-"}<br>
+            Población: ${e.poblacion || "-"}<br>
+            Ubicación: ${e.ubicacion || "-"}<br>
+            Requerimientos: ${e.requerimientos || "-"}<br>
+            Registrado por: ${e.creadoPor}<br>
+            Fecha registro: ${e.fechaRegistro}<br>
+            Estado: <b>${e.estado}</b>`;
+
+          if (usuario.rol === "admin") {
+            const divBtns = document.createElement("div");
+            divBtns.className = "botones-admin";
+
+            const btnAceptar = document.createElement("button");
+            btnAceptar.textContent = "Aceptar";
+            const btnRechazar = document.createElement("button");
+            btnRechazar.textContent = "Rechazar";
+            const btnEliminar = document.createElement("button");
+            btnEliminar.textContent = "Eliminar";
+
+            if (!e.evaluado) {
+              btnAceptar.onclick = () => cambiarEstado(e.id, "Aceptado");
+              btnRechazar.onclick = () => cambiarEstado(e.id, "Rechazado");
+            } else {
+              btnAceptar.disabled = true;
+              btnRechazar.disabled = true;
+            }
+
+            btnEliminar.onclick = () => eliminarEvento(e.id);
+
+            divBtns.append(btnAceptar, btnRechazar, btnEliminar);
+            li.appendChild(divBtns);
+          }
+
+          lista.appendChild(li);
+        });
+      }
+
+      document.getElementById("detalleDia").classList.remove("oculto");
+    }
+
+    // ===== FUNCIONES AUXILIARES =====
+    function cargarEventos() {
+      const eventos = JSON.parse(localStorage.getItem("eventos") || "[]");
+      eventos.forEach(e => calendar.addEvent({ title: e.title, start: e.start, end: e.end }));
+    }
+
+    function cambiarEstado(id, nuevoEstado) {
+      const eventos = JSON.parse(localStorage.getItem("eventos"));
+      const evento = eventos.find(ev => ev.id === id);
+      if (evento && !evento.evaluado) {
+        evento.estado = nuevoEstado;
+        evento.evaluado = true;
+        localStorage.setItem("eventos", JSON.stringify(eventos));
+        alert(`Actividad ${nuevoEstado}`);
+        location.reload();
+      }
+    }
+
+    function eliminarEvento(id) {
+      if (!confirm("¿Desea eliminar esta actividad?")) return;
+      let eventos = JSON.parse(localStorage.getItem("eventos"));
+      eventos = eventos.filter(e => e.id !== id);
+      localStorage.setItem("eventos", JSON.stringify(eventos));
+      alert("Actividad eliminada");
+      location.reload();
+    }
   </script>
 </body>
 </html>

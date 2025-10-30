@@ -5,7 +5,83 @@
   <title>Calendario de Actividades</title>
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
-  <link rel="stylesheet" href="/style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f4f6f8;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1e88e5;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+    }
+
+    h2 {
+      color: #1e88e5;
+    }
+
+    form {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .fila {
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: #1e88e5;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1565c0;
+    }
+
+    #detalleDia {
+      background: white;
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .oculto { display: none; }
+
+    #exportar {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    #exportar button {
+      width: 200px;
+      margin: 5px;
+    }
+  </style>
 </head>
 <body>
   <!-- LOGIN -->
@@ -13,7 +89,7 @@
     <h2>Acceso al Sistema</h2>
     <input type="number" id="cedula" placeholder="Ingrese su número de cédula" />
     <button id="loginBtn">Ingresar</button>
-    <p id="error"></p>
+    <p id="error" style="color:red;"></p>
   </div>
 
   <!-- APP -->
@@ -66,7 +142,7 @@
             <textarea id="descripcion" rows="3" required></textarea>
           </div>
 
-          <!-- NUEVOS CAMPOS AGREGADOS -->
+          <!-- NUEVOS CAMPOS -->
           <div class="fila">
             <label>META:</label>
             <textarea id="meta" rows="2" placeholder="Describa la meta de la actividad" required></textarea>
@@ -85,31 +161,7 @@
           <div class="fila">
             <label>UBICACIÓN (DIRECCIÓN - LUGAR):</label>
             <input type="text" id="ubicacion" placeholder="Dirección o lugar del evento" required />
-          </div>
 
-          <div class="fila">
-            <label>REQUERIMIENTOS LOGÍSTICOS:</label>
-            <textarea id="requerimientos" rows="3" placeholder="Equipos, sonido, sillas, carpas, etc." required></textarea>
-          </div>
-          <!-- FIN NUEVOS CAMPOS -->
-
-          <button type="submit" id="guardarBtn">Guardar Actividad</button>
-        </form>
-      </section>
-
-      <section id="calendario">
-        <div id="calendar"></div>
-        <div id="detalleDia" class="oculto">
-          <h3>Actividades del día seleccionado</h3>
-          <ul id="listaEventos"></ul>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <script src="/script.js"></script>
-</body>
-</html>
 
 
 

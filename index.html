@@ -37,12 +37,6 @@
               <option>Subsidio Bono C</option>
               <option>Casa Mujer Respiro</option>
               <option>Casa del Adulto Mayor</option>
-              <option>Cultura y deporte</option>
-              <option>Ambiente</option>
-              <option>Desarrollo económico</option>
-              <option>Area de Gestión de Desarrollo Local</option>
-              <option>Enlace Social</option>
-              <option>PYBA</option>
               <option>Alcaldía Local de Engativá</option>
             </select>
           </div>
@@ -72,6 +66,33 @@
             <textarea id="descripcion" rows="3" required></textarea>
           </div>
 
+          <!-- NUEVOS CAMPOS AGREGADOS -->
+          <div class="fila">
+            <label>META:</label>
+            <textarea id="meta" rows="2" placeholder="Describa la meta de la actividad" required></textarea>
+          </div>
+
+          <div class="fila">
+            <label>PARTICIPANTES:</label>
+            <input type="text" id="participantes" placeholder="Número o tipo de participantes" required />
+          </div>
+
+          <div class="fila">
+            <label>POBLACIÓN BENEFICIADA:</label>
+            <input type="text" id="poblacion" placeholder="Describa la población beneficiada" required />
+          </div>
+
+          <div class="fila">
+            <label>UBICACIÓN (DIRECCIÓN - LUGAR):</label>
+            <input type="text" id="ubicacion" placeholder="Dirección o lugar del evento" required />
+          </div>
+
+          <div class="fila">
+            <label>REQUERIMIENTOS LOGÍSTICOS:</label>
+            <textarea id="requerimientos" rows="3" placeholder="Equipos, sonido, sillas, carpas, etc." required></textarea>
+          </div>
+          <!-- FIN NUEVOS CAMPOS -->
+
           <button type="submit" id="guardarBtn">Guardar Actividad</button>
         </form>
       </section>
@@ -81,12 +102,6 @@
         <div id="detalleDia" class="oculto">
           <h3>Actividades del día seleccionado</h3>
           <ul id="listaEventos"></ul>
-
-          <!-- Botones de validación visibles solo para Víctor Hugo Huertas y Samuel Camacho -->
-          <div id="accionesValidacion">
-            <button class="btn-validar" id="btnAceptar">Aceptar</button>
-            <button class="btn-validar" id="btnRechazar">Rechazar</button>
-          </div>
         </div>
       </section>
     </main>

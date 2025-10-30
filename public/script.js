@@ -29,7 +29,7 @@ document.getElementById("loginBtn").addEventListener("click", () => {
     document.getElementById("app").style.display = "block";
     document.querySelector("header h1").textContent = `Bienvenido, ${nombreUsuario}`;
 
-    // Mostrar botones de validación solo para Victor o Samuel
+    // Mostrar opciones de validación solo para Víctor o Samuel
     const acciones = document.getElementById("accionesValidacion");
     if (cedula === "80772128" || cedula === "1057581626") {
       acciones.style.display = "block";
@@ -162,6 +162,23 @@ function mostrarEventosDelDia(fechaStr) {
       else if (e.backgroundColor === "red") estado = " [Rechazada]";
 
       li.textContent = `${e.title}${estado} — ${horaInicio} a ${horaFin}`;
+
+      // Si el usuario es Víctor o Samuel, permitir borrar
+      if (usuarioActual && (usuarioActual.cedula === "80772128" || usuarioActual.cedula === "1057581626")) {
+        const btnBorrar = document.createElement("button");
+        btnBorrar.textContent = "🗑️";
+        btnBorrar.style.marginLeft = "10px";
+        btnBorrar.addEventListener("click", () => {
+          if (confirm("¿Deseas eliminar esta actividad?")) {
+            e.remove();
+            guardarEventos();
+            mostrarEventosDelDia(fechaStr);
+            alert("Actividad eliminada.");
+          }
+        });
+        li.appendChild(btnBorrar);
+      }
+
       li.addEventListener("click", () => (eventoSeleccionado = e));
       listaEventos.appendChild(li);
     });
@@ -172,10 +189,17 @@ function mostrarEventosDelDia(fechaStr) {
 
 // --- VALIDAR ACTIVIDAD (ACEPTAR / RECHAZAR) ---
 document.getElementById("btnAceptar").addEventListener("click", () => {
+  if (!usuarioActual || (usuarioActual.cedula !== "80772128" && usuarioActual.cedula !== "1057581626")) {
+    alert("No tienes permiso para aceptar actividades.");
+    return;
+  }
+
   if (eventoSeleccionado) {
-    if (!eventoSeleccionado.title.includes("[Aceptada]")) {
-      eventoSeleccionado.setProp("title", `${eventoSeleccionado.title} [Aceptada]`);
+    if (eventoSeleccionado.title.includes("[Aceptada]") || eventoSeleccionado.title.includes("[Rechazada]")) {
+      alert("Esta actividad ya fue revisada y no se puede volver a modificar.");
+      return;
     }
+    eventoSeleccionado.setProp("title", `${eventoSeleccionado.title} [Aceptada]`);
     eventoSeleccionado.setProp("backgroundColor", "green");
     guardarEventos();
     mostrarEventosDelDia(eventoSeleccionado.startStr.split("T")[0]);
@@ -186,10 +210,17 @@ document.getElementById("btnAceptar").addEventListener("click", () => {
 });
 
 document.getElementById("btnRechazar").addEventListener("click", () => {
+  if (!usuarioActual || (usuarioActual.cedula !== "80772128" && usuarioActual.cedula !== "1057581626")) {
+    alert("No tienes permiso para rechazar actividades.");
+    return;
+  }
+
   if (eventoSeleccionado) {
-    if (!eventoSeleccionado.title.includes("[Rechazada]")) {
-      eventoSeleccionado.setProp("title", `${eventoSeleccionado.title} [Rechazada]`);
+    if (eventoSeleccionado.title.includes("[Aceptada]") || eventoSeleccionado.title.includes("[Rechazada]")) {
+      alert("Esta actividad ya fue revisada y no se puede volver a modificar.");
+      return;
     }
+    eventoSeleccionado.setProp("title", `${eventoSeleccionado.title} [Rechazada]`);
     eventoSeleccionado.setProp("backgroundColor", "red");
     guardarEventos();
     mostrarEventosDelDia(eventoSeleccionado.startStr.split("T")[0]);
@@ -198,4 +229,5 @@ document.getElementById("btnRechazar").addEventListener("click", () => {
     alert("Seleccione una actividad del listado.");
   }
 });
+
 

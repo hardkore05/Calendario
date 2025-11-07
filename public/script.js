@@ -244,9 +244,12 @@ async function mostrarEventosDelDia(fechaStr) {
           const btnEliminar = document.createElement("button");
           btnEliminar.textContent = "Eliminar";
 
-          btnAceptar.onclick = () => cambiarEstado(e._id, "Aceptado");
-          btnRechazar.onclick = () => cambiarEstado(e._id, "Rechazado");
-          btnEliminar.onclick = () => eliminarEvento(e._id);
+          // 🔹 Usar e._id o e.id según corresponda
+          const eventoId = e._id || e.id;
+
+          btnAceptar.onclick = () => cambiarEstado(eventoId, "Aceptado");
+          btnRechazar.onclick = () => cambiarEstado(eventoId, "Rechazado");
+          btnEliminar.onclick = () => eliminarEvento(eventoId);
 
           divBtns.append(btnAceptar, btnRechazar, btnEliminar);
           li.appendChild(divBtns);

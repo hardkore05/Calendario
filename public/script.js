@@ -40,9 +40,7 @@ document.getElementById("loginBtn").addEventListener("click", () => {
 // =========================
 // CERRAR SESIÓN
 // =========================
-document.getElementById("cerrarSesion").addEventListener("click", () => {
-  location.reload();
-});
+document.getElementById("cerrarSesion").addEventListener("click", () => location.reload());
 
 // =========================
 // RESPONSABLES DE OFICINA
@@ -69,7 +67,7 @@ document.getElementById("oficina").addEventListener("change", e => {
 });
 
 // =========================
-// LISTA DE METAS DESPLEGABLE
+// LISTA DE METAS (75)
 // =========================
 const metas = [
   "Fortalecer 100 organizaciones comunitarias a través de capacidades para promover acciones de corresponsabilidad en la gestión de la seguridad y la convivencia.",
@@ -122,7 +120,7 @@ const metas = [
   "Implementar 4 programas comunitarios de cultura ciudadana.",
   "Ejecutar 4 proyectos comunitarios de convivencia.",
   "Fortalecer 8 actores sociales en mediación y conciliación.",
-  "Suministrar 4 dotaciones tecnológicas para la seguridad y convivencia."
+  "Suministrar 4 dotaciones tecnológicas para la seguridad y convivencia.",
   "No Aplica"
 ];
 
@@ -137,7 +135,7 @@ if (selectMeta) {
 }
 
 // =========================
-// INICIALIZAR CALENDARIO
+// CALENDARIO
 // =========================
 const calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
   initialView: "dayGridMonth",
@@ -147,16 +145,31 @@ const calendar = new FullCalendar.Calendar(document.getElementById("calendar"), 
   dateClick: info => mostrarEventosDelDia(info.dateStr)
 });
 calendar.render();
+
+// =========================
+// CARGAR EVENTOS DESDE SERVIDOR
+// =========================
+async function cargarEventos() {
+  try {
+    const res = await fetch("/api/eventos");
+    if (!res.ok) throw new Error("Error al obtener eventos");
+    const eventos = await res.json();
+    calendar.removeAllEvents();
+    eventos.forEach(e => calendar.addEvent({ title: e.title, start: e.start, end: e.end }));
+  } catch (err) {
+    console.error(err);
+    alert("Error cargando eventos desde el servidor.");
+  }
+}
 cargarEventos();
 
 // =========================
-// GUARDAR ACTIVIDAD (versión servidor)
+// GUARDAR NUEVO EVENTO
 // =========================
 document.getElementById("formActividad").addEventListener("submit", async e => {
   e.preventDefault();
 
   const evento = {
-    id: Date.now(),
     title: `${document.getElementById("oficina").value} - ${document.getElementById("descripcion").value}`,
     start: `${document.getElementById("fecha").value}T${document.getElementById("horaInicio").value}`,
     end: `${document.getElementById("fecha").value}T${document.getElementById("horaFin").value}`,
@@ -169,125 +182,120 @@ document.getElementById("formActividad").addEventListener("submit", async e => {
     responsable: document.getElementById("responsable").value,
     creadoPor: usuario.nombre,
     fechaRegistro: new Date().toLocaleString("es-CO"),
-    estado: "Pendiente",
-    evaluado: false
+    estado: "Pendiente"
   };
 
-  await fetch("/api/eventos", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(evento)
-  });
+  try {
+    const res = await fetch("/api/eventos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(evento)
+    });
 
-  calendar.addEvent({ title: evento.title, start: evento.start, end: evento.end });
-  e.target.reset();
-  alert("Actividad guardada exitosamente");
+    if (!res.ok) throw new Error("Error al guardar actividad");
+
+    alert("✅ Actividad guardada correctamente");
+    e.target.reset();
+    await cargarEventos();
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error al guardar actividad");
+  }
 });
-
-// =========================
-// CARGAR EVENTOS DESDE EL SERVIDOR
-// =========================
-async function cargarEventos() {
-  const res = await fetch("/api/eventos");
-  const eventos = await res.json();
-  eventos.forEach(e => calendar.addEvent({ title: e.title, start: e.start, end: e.end }));
-}
 
 // =========================
 // MOSTRAR EVENTOS DEL DÍA
 // =========================
 async function mostrarEventosDelDia(fechaStr) {
   const lista = document.getElementById("listaEventos");
+  try {
+    const res = await fetch("/api/eventos");
+    if (!res.ok) throw new Error("Error al obtener eventos");
+    const eventos = await res.json();
+    const eventosDelDia = eventos.filter(e => e.start && e.start.startsWith(fechaStr));
 
-  // Cargar eventos desde el servidor
-  const res = await fetch("/api/eventos");
-  const eventos = await res.json();
-  const eventosDelDia = eventos.filter(e => e.start.startsWith(fechaStr));
+    lista.innerHTML = "";
+    if (eventosDelDia.length === 0) {
+      lista.innerHTML = "<li>No hay actividades para este día.</li>";
+    } else {
+      eventosDelDia.forEach(e => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <b>${e.title}</b><br>
+          Responsable: ${e.responsable || "-"}<br>
+          Meta: ${e.meta || "-"}<br>
+          Participantes: ${e.participantes || "-"}<br>
+          Población: ${e.poblacion || "-"}<br>
+          Ubicación: ${e.ubicacion || "-"}<br>
+          Requerimientos: ${e.requerimientos || "-"}<br>
+          Registrado por: ${e.creadoPor || "-"}<br>
+          Fecha registro: ${e.fechaRegistro || "-"}<br>
+          Estado: <b>${e.estado || "-"}</b>
+        `;
 
-  lista.innerHTML = "";
-  if (eventosDelDia.length === 0) {
-    lista.innerHTML = "<li>No hay actividades para este día.</li>";
-  } else {
-    eventosDelDia.forEach(e => {
-      const li = document.createElement("li");
-      li.innerHTML = `
-        <b>${e.title}</b><br>
-        Responsable: ${e.responsable}<br>
-        Meta: ${e.meta || "-"}<br>
-        Participantes: ${e.participantes || "-"}<br>
-        Población: ${e.poblacion || "-"}<br>
-        Ubicación: ${e.ubicacion || "-"}<br>
-        Requerimientos: ${e.requerimientos || "-"}<br>
-        Registrado por: ${e.creadoPor}<br>
-        Fecha registro: ${e.fechaRegistro}<br>
-        Estado: <b>${e.estado}</b>`;
+        if (usuario && usuario.rol === "admin") {
+          const divBtns = document.createElement("div");
+          divBtns.className = "botones-admin";
 
-      // Botones de administración
-      if (usuario.rol === "admin") {
-        const divBtns = document.createElement("div");
-        divBtns.className = "botones-admin";
+          const btnAceptar = document.createElement("button");
+          btnAceptar.textContent = "Aceptar";
+          const btnRechazar = document.createElement("button");
+          btnRechazar.textContent = "Rechazar";
+          const btnEliminar = document.createElement("button");
+          btnEliminar.textContent = "Eliminar";
 
-        const btnAceptar = document.createElement("button");
-        btnAceptar.textContent = "Aceptar";
-        const btnRechazar = document.createElement("button");
-        btnRechazar.textContent = "Rechazar";
-        const btnEliminar = document.createElement("button");
-        btnEliminar.textContent = "Eliminar";
+          btnAceptar.onclick = () => cambiarEstado(e._id, "Aceptado");
+          btnRechazar.onclick = () => cambiarEstado(e._id, "Rechazado");
+          btnEliminar.onclick = () => eliminarEvento(e._id);
 
-        if (!e.evaluado) {
-          btnAceptar.onclick = () => cambiarEstado(e.id, "Aceptado");
-          btnRechazar.onclick = () => cambiarEstado(e.id, "Rechazado");
-        } else {
-          btnAceptar.disabled = true;
-          btnRechazar.disabled = true;
+          divBtns.append(btnAceptar, btnRechazar, btnEliminar);
+          li.appendChild(divBtns);
         }
 
-        btnEliminar.onclick = () => eliminarEvento(e.id);
-
-        divBtns.append(btnAceptar, btnRechazar, btnEliminar);
-        li.appendChild(divBtns);
-      }
-
-      lista.appendChild(li);
-    });
+        lista.appendChild(li);
+      });
+    }
+    document.getElementById("detalleDia").classList.remove("oculto");
+  } catch (err) {
+    console.error(err);
+    lista.innerHTML = "<li>Error cargando actividades.</li>";
   }
-
-  document.getElementById("detalleDia").classList.remove("oculto");
 }
 
 // =========================
-// FUNCIONES AUXILIARES
+// CAMBIAR ESTADO
 // =========================
-function cargarEventos() {
-fetch("/api/eventos")
-  .then(res => res.json())
-  .then(eventos => {
-    eventos.forEach(e => calendar.addEvent({ title: e.title, start: e.start, end: e.end }));
-  });
-
-function cambiarEstado(id, nuevoEstado) {
-  fetch(`/api/eventos/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ estado: nuevoEstado, evaluado: true })
-  })
-  .then(res => res.json())
-  .then(() => {
-    alert(`Actividad ${nuevoEstado}`);
-    location.reload();
-  });
+async function cambiarEstado(id, nuevoEstado) {
+  if (!confirm(`¿Deseas marcar este evento como ${nuevoEstado}?`)) return;
+  try {
+    const res = await fetch(`/api/eventos/${id}/estado`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ estado: nuevoEstado })
+    });
+    if (!res.ok) throw new Error("Error actualizando estado");
+    alert(`✅ Actividad ${nuevoEstado}`);
+    await cargarEventos();
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error al actualizar estado");
+  }
 }
 
-function eliminarEvento(id) {
-  if (!confirm("¿Desea eliminar esta actividad?")) return;
-  let eventos = JSON.parse(localStorage.getItem("eventos"));
-  eventos = eventos.filter(e => e.id !== id);
-  localStorage.setItem("eventos", JSON.stringify(eventos));
-  alert("Actividad eliminada");
-  location.reload();
+// =========================
+// ELIMINAR EVENTO
+// =========================
+async function eliminarEvento(id) {
+  if (!confirm("¿Deseas eliminar este evento?")) return;
+  try {
+    const res = await fetch(`/api/eventos/${id}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("Error eliminando evento");
+    alert("🗑️ Evento eliminado");
+    await cargarEventos();
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error al eliminar evento");
+  }
 }
 
-
-
-
-
+  

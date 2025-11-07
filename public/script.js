@@ -148,10 +148,11 @@ const calendar = new FullCalendar.Calendar(document.getElementById("calendar"), 
 });
 calendar.render();
 cargarEventos();
+
 // =========================
-// GUARDAR ACTIVIDAD
+// GUARDAR ACTIVIDAD (versión servidor)
 // =========================
-document.getElementById("formActividad").addEventListener("submit", e => {
+document.getElementById("formActividad").addEventListener("submit", async e => {
   e.preventDefault();
 
   const evento = {
@@ -172,22 +173,25 @@ document.getElementById("formActividad").addEventListener("submit", e => {
     evaluado: false
   };
 
-fetch("/api/eventos", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(evento)
-})
-.then(res => res.json())
-.then(() => {
-  calendar.addEvent({ title: evento.title, start: evento.start, end: evento.end });
-  e.target.reset();
-  alert("Actividad guardada exitosamente");
-});
+  await fetch("/api/eventos", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(evento)
+  });
 
   calendar.addEvent({ title: evento.title, start: evento.start, end: evento.end });
   e.target.reset();
   alert("Actividad guardada exitosamente");
 });
+
+// =========================
+// CARGAR EVENTOS DESDE EL SERVIDOR
+// =========================
+async function cargarEventos() {
+  const res = await fetch("/api/eventos");
+  const eventos = await res.json();
+  eventos.forEach(e => calendar.addEvent({ title: e.title, start: e.start, end: e.end }));
+}
 
 // =========================
 // MOSTRAR EVENTOS DEL DÍA

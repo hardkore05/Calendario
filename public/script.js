@@ -196,16 +196,19 @@ async function cargarEventos() {
 // =========================
 // MOSTRAR EVENTOS DEL DÍA
 // =========================
-function mostrarEventosDelDia(fechaStr) {
+async function mostrarEventosDelDia(fechaStr) {
   const lista = document.getElementById("listaEventos");
-  const eventos = JSON.parse(localStorage.getItem("eventos") || "[]")
-    .filter(e => e.start.startsWith(fechaStr));
+
+  // Cargar eventos desde el servidor
+  const res = await fetch("/api/eventos");
+  const eventos = await res.json();
+  const eventosDelDia = eventos.filter(e => e.start.startsWith(fechaStr));
 
   lista.innerHTML = "";
-  if (eventos.length === 0) {
+  if (eventosDelDia.length === 0) {
     lista.innerHTML = "<li>No hay actividades para este día.</li>";
   } else {
-    eventos.forEach(e => {
+    eventosDelDia.forEach(e => {
       const li = document.createElement("li");
       li.innerHTML = `
         <b>${e.title}</b><br>

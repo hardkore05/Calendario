@@ -1,13 +1,47 @@
+// =========================
+// IMPORTS
+// =========================
 const express = require("express");
 const path = require("path");
-const fs = require("fs");
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 
+// =========================
+// CONFIGURACIÓN APP
+// =========================
 const app = express();
 const PORT = process.env.PORT || 3000;
-const dataPath = path.join(__dirname, "data", "eventos.json");
 
-// Middleware
+// =========================
+// CONEXIÓN A MONGODB ATLAS
+// =========================
+mongoose.connect("mongodb+srv://Daniel:Daniel2025@cluster0.h9b1yko.mongodb.net/calendario?retryWrites=true&w=majority&appName=Cluster0")
+  .then(() => console.log("✅ Conectado a MongoDB Atlas"))
+  .catch(err => console.error("❌ Error al conectar MongoDB:", err));
+
+// =========================
+// DEFINICIÓN DEL MODELO
+// =========================
+const eventoSchema = new mongoose.Schema({
+  title: String,
+  start: String,
+  end: String,
+  meta: String,
+  participantes: String,
+  poblacion: String,
+  ubicacion: String,
+  requerimientos: String,
+  responsable: String,
+  creadoPor: String,
+  fechaRegistro: String,
+  estado: { type: String, default: "Pendiente" }
+});
+
+const Evento = mongoose.model("Evento", eventoSchema);
+
+// =========================
+// MIDDLEWARE
+// =========================
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -22,35 +56,56 @@ app.get("/", (req, res) => {
 // API DE EVENTOS
 // =========================
 
-// Obtener todos los eventos
-app.get("/api/eventos", (req, res) => {
-  fs.readFile(dataPath, "utf8", (err, data) => {
-    if (err) return res.status(500).json({ error: "Error al leer los eventos" });
-    res.json(JSON.parse(data));
-  });
+// 🔹 Obtener todos los eventos
+app.get("/api/eventos", async (req, res) => {
+  try {
+    const eventos = await Evento.find();
+    res.json(eventos);
+  } catch (err) {
+    res.status(500).json({ error: "Error al obtener eventos" });
+  }
 });
 
-// Guardar nuevo evento
-app.post("/api/eventos", (req, res) => {
-  const nuevoEvento = req.body;
-  fs.readFile(dataPath, "utf8", (err, data) => {
-    if (err) return res.status(500).json({ error: "Error al leer archivo" });
+// 🔹 Guardar nuevo evento
+app.post("/api/eventos", async (req, res) => {
+  try {
+    const nuevoEvento = new Evento(req.body);
+    await nuevoEvento.save();
+    res.json({ message: "✅ Evento guardado correctamente" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error al guardar evento" });
+  }
+});
 
-    const eventos = JSON.parse(data);
-    eventos.push(nuevoEvento);
+// 🔹 Cambiar estado del evento (aceptar/rechazar)
+app.put("/api/eventos/:id/estado", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { estado } = req.body;
+    await Evento.findByIdAndUpdate(id, { estado });
+    res.json({ message: `Estado actualizado a ${estado}` });
+  } catch (err) {
+    res.status(500).json({ error: "Error al actualizar estado" });
+  }
+});
 
-    fs.writeFile(dataPath, JSON.stringify(eventos, null, 2), err2 => {
-      if (err2) return res.status(500).json({ error: "Error al guardar evento" });
-      res.json({ message: "Evento guardado correctamente" });
-    });
-  });
+// 🔹 Eliminar evento
+app.delete("/api/eventos/:id", async (req, res) => {
+  try {
+    await Evento.findByIdAndDelete(req.params.id);
+    res.json({ message: "Evento eliminado correctamente" });
+  } catch (err) {
+    res.status(500).json({ error: "Error al eliminar evento" });
+  }
 });
 
 // =========================
 // INICIAR SERVIDOR
 // =========================
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
+  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
 });
+
 
 

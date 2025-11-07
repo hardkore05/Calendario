@@ -4,7 +4,7 @@
 const usuarios = {
   "80772128": { nombre: "Víctor Hugo Huertas Prada", oficina: "Alcaldía Local de Engativá", rol: "admin" },
   "1057581626": { nombre: "Samuel Camacho", oficina: "Área de Gestión de Desarrollo Local", rol: "admin" },
-  "1014201517": { nombre: "Daniel Rincón", oficina: "Cultura y Deporte", rol: "user" },
+  "1014201517": { nombre: "Daniel Rincón", oficina: " ", rol: "user" },
   "1019004954": { nombre: "Edgar Forero", oficina: "Instancias de Participación", rol: "user" },
   "1052380026": { nombre: "Sandra Tellez", oficina: "Salud", rol: "user" },
   "1032506186": { nombre: "Alexandra Bueno", oficina: "Educación", rol: "user" },
@@ -123,6 +123,7 @@ const metas = [
   "Ejecutar 4 proyectos comunitarios de convivencia.",
   "Fortalecer 8 actores sociales en mediación y conciliación.",
   "Suministrar 4 dotaciones tecnológicas para la seguridad y convivencia."
+  "No Aplica"
 ];
 
 const selectMeta = document.getElementById("meta");
@@ -171,9 +172,17 @@ document.getElementById("formActividad").addEventListener("submit", e => {
     evaluado: false
   };
 
-  const eventos = JSON.parse(localStorage.getItem("eventos") || "[]");
-  eventos.push(evento);
-  localStorage.setItem("eventos", JSON.stringify(eventos));
+fetch("/api/eventos", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(evento)
+})
+.then(res => res.json())
+.then(() => {
+  calendar.addEvent({ title: evento.title, start: evento.start, end: evento.end });
+  e.target.reset();
+  alert("Actividad guardada exitosamente");
+});
 
   calendar.addEvent({ title: evento.title, start: evento.start, end: evento.end });
   e.target.reset();
@@ -243,20 +252,23 @@ function mostrarEventosDelDia(fechaStr) {
 // FUNCIONES AUXILIARES
 // =========================
 function cargarEventos() {
-  const eventos = JSON.parse(localStorage.getItem("eventos") || "[]");
-  eventos.forEach(e => calendar.addEvent({ title: e.title, start: e.start, end: e.end }));
-}
+fetch("/api/eventos")
+  .then(res => res.json())
+  .then(eventos => {
+    eventos.forEach(e => calendar.addEvent({ title: e.title, start: e.start, end: e.end }));
+  });
 
 function cambiarEstado(id, nuevoEstado) {
-  const eventos = JSON.parse(localStorage.getItem("eventos"));
-  const evento = eventos.find(ev => ev.id === id);
-  if (evento && !evento.evaluado) {
-    evento.estado = nuevoEstado;
-    evento.evaluado = true;
-    localStorage.setItem("eventos", JSON.stringify(eventos));
+  fetch(`/api/eventos/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ estado: nuevoEstado, evaluado: true })
+  })
+  .then(res => res.json())
+  .then(() => {
     alert(`Actividad ${nuevoEstado}`);
     location.reload();
-  }
+  });
 }
 
 function eliminarEvento(id) {

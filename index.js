@@ -2,10 +2,10 @@
 // IMPORTS
 // =========================
 const express = require("express");
-const path = require("path");
-const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
 const cors = require("cors");
+const path = require("path");
 
 // =========================
 // CONFIGURACIÓN APP
@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 3000;
 // =========================
 // MIDDLEWARE
 // =========================
-app.use(cors()); // 🔹 Permite solicitudes desde otros equipos o dominios
+app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -25,12 +25,12 @@ app.use(express.static(path.join(__dirname, "public")));
 // =========================
 mongoose.connect("mongodb+srv://Daniel:Daniel2025@cluster0.h9b1yko.mongodb.net/calendario?retryWrites=true&w=majority")
   .then(() => console.log("✅ Conectado a MongoDB Atlas"))
-  .catch(err => console.error("❌ Error al conectar MongoDB:", err));
+  .catch(err => console.error("❌ Error conectando a MongoDB:", err));
 
 // =========================
-// DEFINICIÓN DEL MODELO
+// MODELO EVENTO
 // =========================
-const eventoSchema = new mongoose.Schema({
+const EventoSchema = new mongoose.Schema({
   title: String,
   start: String,
   end: String,
@@ -39,23 +39,17 @@ const eventoSchema = new mongoose.Schema({
   poblacion: String,
   ubicacion: String,
   requerimientos: String,
+  oficina: String,
   responsable: String,
   creadoPor: String,
   fechaRegistro: String,
   estado: { type: String, default: "Pendiente" }
 });
 
-const Evento = mongoose.model("Evento", eventoSchema, "eventos"); // 🔹 Forzamos colección "eventos"
+const Evento = mongoose.model("Evento", EventoSchema, "eventos");
 
 // =========================
-// RUTA PRINCIPAL
-// =========================
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-
-// =========================
-// API DE EVENTOS
+// RUTAS API
 // =========================
 
 // 🔹 Obtener todos los eventos
@@ -63,35 +57,34 @@ app.get("/api/eventos", async (req, res) => {
   try {
     const eventos = await Evento.find();
     res.json(eventos);
-  } catch (err) {
-    console.error("❌ Error al obtener eventos:", err);
+  } catch (error) {
+    console.error("❌ Error al obtener eventos:", error);
     res.status(500).json({ error: "Error al obtener eventos" });
   }
 });
 
-// 🔹 Guardar nuevo evento
+// 🔹 Crear nuevo evento
 app.post("/api/eventos", async (req, res) => {
   try {
-    console.log("📩 Datos recibidos del cliente:", req.body);
     const nuevoEvento = new Evento(req.body);
     await nuevoEvento.save();
-    console.log("✅ Evento guardado en MongoDB:", nuevoEvento);
-    res.status(201).json({ mensaje: "Evento guardado correctamente" });
-  } catch (err) {
-    console.error("❌ Error al guardar evento:", err);
+    res.status(201).json({ ok: true, evento: nuevoEvento });
+  } catch (error) {
+    console.error("❌ Error al guardar evento:", error);
     res.status(500).json({ error: "Error al guardar evento" });
   }
 });
 
-// 🔹 Cambiar estado del evento (aceptar/rechazar)
+// 🔹 Actualizar estado (Aceptar / Rechazar)
 app.put("/api/eventos/:id/estado", async (req, res) => {
   try {
     const { id } = req.params;
     const { estado } = req.body;
-    await Evento.findByIdAndUpdate(id, { estado });
-    res.json({ message: `Estado actualizado a ${estado}` });
-  } catch (err) {
-    console.error("❌ Error al actualizar estado:", err);
+    const evento = await Evento.findByIdAndUpdate(id, { estado }, { new: true });
+    if (!evento) return res.status(404).json({ error: "Evento no encontrado" });
+    res.json({ ok: true, estado });
+  } catch (error) {
+    console.error("❌ Error al actualizar estado:", error);
     res.status(500).json({ error: "Error al actualizar estado" });
   }
 });
@@ -99,17 +92,23 @@ app.put("/api/eventos/:id/estado", async (req, res) => {
 // 🔹 Eliminar evento
 app.delete("/api/eventos/:id", async (req, res) => {
   try {
-    await Evento.findByIdAndDelete(req.params.id);
-    res.json({ message: "Evento eliminado correctamente" });
-  } catch (err) {
-    console.error("❌ Error al eliminar evento:", err);
+    const { id } = req.params;
+    await Evento.findByIdAndDelete(id);
+    res.json({ ok: true, message: "Evento eliminado correctamente" });
+  } catch (error) {
+    console.error("❌ Error al eliminar evento:", error);
     res.status(500).json({ error: "Error al eliminar evento" });
   }
 });
 
 // =========================
+// SERVIR FRONTEND
+// =========================
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// =========================
 // INICIAR SERVIDOR
 // =========================
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Servidor corriendo en puerto ${PORT}`));

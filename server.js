@@ -2,17 +2,45 @@
 // IMPORTS
 // =========================
 const express = require("express");
-const fs = require("fs");
-const path = require("path");
+const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const path = require("path");
 
 // =========================
 // CONFIGURACIÓN APP
 // =========================
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DATA_FILE = path.join(__dirname, "public", "eventos.json");
+
+// =========================
+// CONEXIÓN A MONGODB
+// =========================
+const MONGO_URI = "mongodb://localhost:27017/calendario"; // 🔹 cambia si usas Atlas o un URI distinto
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("✅ Conectado a MongoDB"))
+  .catch(err => console.error("❌ Error conectando a MongoDB:", err));
+
+// =========================
+// MODELO EVENTO
+// =========================
+const EventoSchema = new mongoose.Schema({
+  title: String,
+  start: String,
+  end: String,
+  meta: String,
+  participantes: String,
+  poblacion: String,
+  ubicacion: String,
+  requerimientos: String,
+  oficina: String,
+  responsable: String,
+  creadoPor: String,
+  fechaRegistro: String,
+  estado: { type: String, default: "Pendiente" }
+});
+
+const Evento = mongoose.model("Evento", EventoSchema);
 
 // =========================
 // MIDDLEWARE
@@ -22,66 +50,40 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 // =========================
-// OBTENER EVENTOS
+// RUTAS API
 // =========================
-app.get("/api/eventos", (req, res) => {
+
+// 🔹 Obtener todos los eventos
+app.get("/api/eventos", async (req, res) => {
   try {
-    if (!fs.existsSync(DATA_FILE)) {
-      fs.writeFileSync(DATA_FILE, "[]");
-    }
-    const data = fs.readFileSync(DATA_FILE, "utf8");
-    res.json(JSON.parse(data));
+    const eventos = await Evento.find();
+    res.json(eventos);
   } catch (error) {
-    console.error("Error al leer eventos:", error);
-    res.status(500).json({ error: "Error al leer eventos" });
+    console.error("Error al obtener eventos:", error);
+    res.status(500).json({ error: "Error al obtener eventos" });
   }
 });
 
-// =========================
-// GUARDAR NUEVO EVENTO
-// =========================
-app.post("/api/eventos", (req, res) => {
+// 🔹 Crear nuevo evento
+app.post("/api/eventos", async (req, res) => {
   try {
-    const evento = req.body;
-    let eventos = [];
-
-    if (fs.existsSync(DATA_FILE)) {
-      eventos = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-    }
-
-    // Generar ID único
-    evento._id = new Date().getTime().toString();
-    evento.estado = "pendiente";
-    eventos.push(evento);
-
-    fs.writeFileSync(DATA_FILE, JSON.stringify(eventos, null, 2));
-    res.json({ ok: true, evento });
+    const nuevoEvento = new Evento(req.body);
+    await nuevoEvento.save();
+    res.json({ ok: true, evento: nuevoEvento });
   } catch (error) {
     console.error("Error al guardar evento:", error);
     res.status(500).json({ error: "Error al guardar evento" });
   }
 });
 
-// =========================
-// ACTUALIZAR ESTADO (ACEPTAR / RECHAZAR)
-// =========================
-app.put("/api/eventos/:id/estado", (req, res) => {
+// 🔹 Actualizar estado (Aceptar/Rechazar)
+app.put("/api/eventos/:id/estado", async (req, res) => {
   try {
-    if (!fs.existsSync(DATA_FILE)) {
-      return res.status(404).json({ error: "Archivo de datos no encontrado" });
-    }
-
-    let eventos = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
     const { id } = req.params;
     const { estado } = req.body;
 
-    const index = eventos.findIndex(e => e._id === id || e.id === id);
-    if (index === -1) {
-      return res.status(404).json({ error: "Evento no encontrado" });
-    }
-
-    eventos[index].estado = estado;
-    fs.writeFileSync(DATA_FILE, JSON.stringify(eventos, null, 2));
+    const evento = await Evento.findByIdAndUpdate(id, { estado }, { new: true });
+    if (!evento) return res.status(404).json({ error: "Evento no encontrado" });
 
     res.json({ ok: true, estado });
   } catch (error) {
@@ -90,21 +92,11 @@ app.put("/api/eventos/:id/estado", (req, res) => {
   }
 });
 
-// =========================
-// ELIMINAR EVENTO
-// =========================
-app.delete("/api/eventos/:id", (req, res) => {
+// 🔹 Eliminar evento
+app.delete("/api/eventos/:id", async (req, res) => {
   try {
-    if (!fs.existsSync(DATA_FILE)) {
-      return res.status(404).json({ error: "Archivo de datos no encontrado" });
-    }
-
-    let eventos = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
     const { id } = req.params;
-
-    eventos = eventos.filter(e => e._id !== id && e.id !== id);
-    fs.writeFileSync(DATA_FILE, JSON.stringify(eventos, null, 2));
-
+    await Evento.findByIdAndDelete(id);
     res.json({ ok: true });
   } catch (error) {
     console.error("Error al eliminar evento:", error);
@@ -116,6 +108,6 @@ app.delete("/api/eventos/:id", (req, res) => {
 // INICIAR SERVIDOR
 // =========================
 app.listen(PORT, () => {
-  console.log(`✅ Servidor escuchando en http://localhost:${PORT}`);
+  console.log(`🚀 Servidor escuchando en http://localhost:${PORT}`);
 });
 

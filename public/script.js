@@ -154,14 +154,25 @@ async function cargarEventos() {
     const res = await fetch("/api/eventos");
     if (!res.ok) throw new Error("Error al obtener eventos");
     const eventos = await res.json();
+
     calendar.removeAllEvents();
-    eventos.forEach(e => calendar.addEvent({ title: e.title, start: e.start, end: e.end }));
+
+    eventos.forEach(e => {
+      calendar.addEvent({ 
+        title: e.title, 
+        start: e.start, 
+        end: e.end, 
+        id: e._id // 🔹 importante para FullCalendar y botones
+      });
+    });
+
+    return eventos; // 🔹 para mostrarEventosDelDia
   } catch (err) {
     console.error(err);
     alert("Error cargando eventos desde el servidor.");
+    return [];
   }
 }
-cargarEventos();
 
 // =========================
 // GUARDAR NUEVO EVENTO
@@ -209,9 +220,7 @@ document.getElementById("formActividad").addEventListener("submit", async e => {
 async function mostrarEventosDelDia(fechaStr) {
   const lista = document.getElementById("listaEventos");
   try {
-    const res = await fetch("/api/eventos");
-    if (!res.ok) throw new Error("Error al obtener eventos");
-    const eventos = await res.json();
+    const eventos = await cargarEventos();
     const eventosDelDia = eventos.filter(e => e.start && e.start.startsWith(fechaStr));
 
     lista.innerHTML = "";
@@ -244,12 +253,9 @@ async function mostrarEventosDelDia(fechaStr) {
           const btnEliminar = document.createElement("button");
           btnEliminar.textContent = "Eliminar";
 
-          // 🔹 Usar e._id o e.id según corresponda
-          const eventoId = e._id || e.id;
-
-          btnAceptar.onclick = () => cambiarEstado(eventoId, "Aceptado");
-          btnRechazar.onclick = () => cambiarEstado(eventoId, "Rechazado");
-          btnEliminar.onclick = () => eliminarEvento(eventoId);
+          btnAceptar.onclick = () => cambiarEstado(e._id, "Aceptado");
+          btnRechazar.onclick = () => cambiarEstado(e._id, "Rechazado");
+          btnEliminar.onclick = () => eliminarEvento(e._id);
 
           divBtns.append(btnAceptar, btnRechazar, btnEliminar);
           li.appendChild(divBtns);
@@ -300,5 +306,6 @@ async function eliminarEvento(id) {
     alert("❌ Error al eliminar evento");
   }
 }
+
 
   

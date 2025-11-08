@@ -1,58 +1,121 @@
-import express from "express";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+// =========================
+// IMPORTS
+// =========================
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
+const bodyParser = require("body-parser");
+const cors = require("cors");
 
+// =========================
+// CONFIGURACIÓN APP
+// =========================
 const app = express();
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PORT = process.env.PORT || 3000;
+const DATA_FILE = path.join(__dirname, "public", "eventos.json");
 
-app.use(express.json());
+// =========================
+// MIDDLEWARE
+// =========================
+app.use(cors());
+app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-const DATA_FILE = path.join(__dirname, "eventos.json");
-
-// Leer eventos
+// =========================
+// OBTENER EVENTOS
+// =========================
 app.get("/api/eventos", (req, res) => {
   try {
-    if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, "[]");
-    const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: "Error al leer los eventos" });
+    if (!fs.existsSync(DATA_FILE)) {
+      fs.writeFileSync(DATA_FILE, "[]");
+    }
+    const data = fs.readFileSync(DATA_FILE, "utf8");
+    res.json(JSON.parse(data));
+  } catch (error) {
+    console.error("Error al leer eventos:", error);
+    res.status(500).json({ error: "Error al leer eventos" });
   }
 });
 
-// Guardar nuevo evento
+// =========================
+// GUARDAR NUEVO EVENTO
+// =========================
 app.post("/api/eventos", (req, res) => {
   try {
-    const eventos = fs.existsSync(DATA_FILE)
-      ? JSON.parse(fs.readFileSync(DATA_FILE, "utf8"))
-      : [];
-    eventos.push(req.body);
+    const evento = req.body;
+    let eventos = [];
+
+    if (fs.existsSync(DATA_FILE)) {
+      eventos = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+    }
+
+    // Generar ID único
+    evento._id = new Date().getTime().toString();
+    evento.estado = "pendiente";
+    eventos.push(evento);
+
     fs.writeFileSync(DATA_FILE, JSON.stringify(eventos, null, 2));
-    res.json({ ok: true });
-  } catch (err) {
+    res.json({ ok: true, evento });
+  } catch (error) {
+    console.error("Error al guardar evento:", error);
     res.status(500).json({ error: "Error al guardar evento" });
   }
 });
 
-// Actualizar estado (aceptar/rechazar)
-app.put("/api/eventos/:id", (req, res) => {
+// =========================
+// ACTUALIZAR ESTADO (ACEPTAR / RECHAZAR)
+// =========================
+app.put("/api/eventos/:id/estado", (req, res) => {
   try {
-    let eventos = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-    const index = eventos.findIndex(e => e.id == req.params.id);
-    if (index !== -1) {
-      eventos[index] = { ...eventos[index], ...req.body };
-      fs.writeFileSync(DATA_FILE, JSON.stringify(eventos, null, 2));
-      res.json({ ok: true });
-    } else {
-      res.status(404).json({ error: "Evento no encontrado" });
+    if (!fs.existsSync(DATA_FILE)) {
+      return res.status(404).json({ error: "Archivo de datos no encontrado" });
     }
-  } catch (err) {
-    res.status(500).json({ error: "Error al actualizar evento" });
+
+    let eventos = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+    const { id } = req.params;
+    const { estado } = req.body;
+
+    const index = eventos.findIndex(e => e._id === id || e.id === id);
+    if (index === -1) {
+      return res.status(404).json({ error: "Evento no encontrado" });
+    }
+
+    eventos[index].estado = estado;
+    fs.writeFileSync(DATA_FILE, JSON.stringify(eventos, null, 2));
+
+    res.json({ ok: true, estado });
+  } catch (error) {
+    console.error("Error al actualizar estado:", error);
+    res.status(500).json({ error: "Error al actualizar estado" });
   }
 });
 
-// Puerto para Render (usa variable de entorno o 3000)
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor activo en puerto ${PORT}`));
+// =========================
+// ELIMINAR EVENTO
+// =========================
+app.delete("/api/eventos/:id", (req, res) => {
+  try {
+    if (!fs.existsSync(DATA_FILE)) {
+      return res.status(404).json({ error: "Archivo de datos no encontrado" });
+    }
+
+    let eventos = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+    const { id } = req.params;
+
+    eventos = eventos.filter(e => e._id !== id && e.id !== id);
+    fs.writeFileSync(DATA_FILE, JSON.stringify(eventos, null, 2));
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error("Error al eliminar evento:", error);
+    res.status(500).json({ error: "Error al eliminar evento" });
+  }
+});
+
+// =========================
+// INICIAR SERVIDOR
+// =========================
+app.listen(PORT, () => {
+  console.log(`✅ Servidor escuchando en http://localhost:${PORT}`);
+});
+

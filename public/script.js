@@ -224,46 +224,60 @@ async function mostrarEventosDelDia(fechaStr) {
     const eventosDelDia = eventos.filter(e => e.start && e.start.startsWith(fechaStr));
 
     lista.innerHTML = "";
-    if (eventosDelDia.length === 0) {
-      lista.innerHTML = "<li>No hay actividades para este día.</li>";
-    } else {
-      eventosDelDia.forEach(e => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-          <b>${e.title}</b><br>
-          Responsable: ${e.responsable || "-"}<br>
-          Meta: ${e.meta || "-"}<br>
-          Participantes: ${e.participantes || "-"}<br>
-          Población: ${e.poblacion || "-"}<br>
-          Ubicación: ${e.ubicacion || "-"}<br>
-          Requerimientos: ${e.requerimientos || "-"}<br>
-          Registrado por: ${e.creadoPor || "-"}<br>
-          Fecha registro: ${e.fechaRegistro || "-"}<br>
-          Estado: <b>${e.estado || "-"}</b>
-        `;
+if (eventosDelDia.length === 0) {
+  lista.innerHTML = "<li>No hay actividades para este día.</li>";
+} else {
+  eventosDelDia.forEach(e => {
+    const li = document.createElement("li");
 
-        if (usuario && usuario.rol === "admin") {
-          const divBtns = document.createElement("div");
-          divBtns.className = "botones-admin";
+    // Formato de horas en Colombia
+    const horaInicio = e.start
+      ? new Date(e.start).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })
+      : "-";
 
-          const btnAceptar = document.createElement("button");
-          btnAceptar.textContent = "Aceptar";
-          const btnRechazar = document.createElement("button");
-          btnRechazar.textContent = "Rechazar";
-          const btnEliminar = document.createElement("button");
-          btnEliminar.textContent = "Eliminar";
+    const horaFin = e.end
+      ? new Date(e.end).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })
+      : "-";
 
-          btnAceptar.onclick = () => cambiarEstado(e._id, "Aceptado");
-          btnRechazar.onclick = () => cambiarEstado(e._id, "Rechazado");
-          btnEliminar.onclick = () => eliminarEvento(e._id);
+    li.innerHTML = `
+      <b>${e.title}</b><br>
+      Responsable: ${e.responsable || "-"}<br>
+      Meta: ${e.meta || "-"}<br>
+      Participantes: ${e.participantes || "-"}<br>
+      Población: ${e.poblacion || "-"}<br>
+      Ubicación: ${e.ubicacion || "-"}<br>
+      Requerimientos: ${e.requerimientos || "-"}<br>
 
-          divBtns.append(btnAceptar, btnRechazar, btnEliminar);
-          li.appendChild(divBtns);
-        }
+      ⏰ Hora inicio: ${horaInicio}<br>
+      ⏰ Hora fin: ${horaFin}<br>
 
-        lista.appendChild(li);
-      });
+      Registrado por: ${e.creadoPor || "-"}<br>
+      Fecha registro: ${e.fechaRegistro || "-"}<br>
+      Estado: <b>${e.estado || "-"}</b>
+    `;
+
+    if (usuario && usuario.rol === "admin") {
+      const divBtns = document.createElement("div");
+      divBtns.className = "botones-admin";
+
+      const btnAceptar = document.createElement("button");
+      btnAceptar.textContent = "Aceptar";
+      const btnRechazar = document.createElement("button");
+      btnRechazar.textContent = "Rechazar";
+      const btnEliminar = document.createElement("button");
+      btnEliminar.textContent = "Eliminar";
+
+      btnAceptar.onclick = () => cambiarEstado(e._id, "Aceptado");
+      btnRechazar.onclick = () => cambiarEstado(e._id, "Rechazado");
+      btnEliminar.onclick = () => eliminarEvento(e._id);
+
+      divBtns.append(btnAceptar, btnRechazar, btnEliminar);
+      li.appendChild(divBtns);
     }
+
+    lista.appendChild(li);
+  });
+}
     document.getElementById("detalleDia").classList.remove("oculto");
   } catch (err) {
     console.error(err);

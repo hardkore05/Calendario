@@ -378,19 +378,21 @@
         extendedProps: e
       }));
     }
-
     async function cambiarEstado(id, nuevoEstado) {
-      const res = await fetch(`/api/eventos/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ estado: nuevoEstado, evaluado: true })
-      });
-      if (res.ok) {
-        alert(`Actividad ${nuevoEstado}`);
-        cargarEventos();
-      }
-    }
+  const res = await fetch(`/api/eventos/${id}/estado`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ estado: nuevoEstado, evaluado: true })
+  });
 
+  if (res.ok) {
+    alert(`Actividad ${nuevoEstado}`);
+    await cargarEventos();
+    document.getElementById("detalleDia").classList.add("oculto");
+  } else {
+    alert("Error actualizando estado");
+  }
+}
     async function eliminarEvento(id) {
       if (!confirm("¿Desea eliminar esta actividad?")) return;
       const res = await fetch(`/api/eventos/${id}`, { method: "DELETE" });

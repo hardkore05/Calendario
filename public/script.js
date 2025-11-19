@@ -182,8 +182,8 @@ document.getElementById("formActividad").addEventListener("submit", async e => {
 
   const evento = {
     title: `${document.getElementById("oficina").value} - ${document.getElementById("descripcion").value}`,
-    start: `${document.getElementById("fecha").value}T${document.getElementById("horaInicio").value}`,
-    end: `${document.getElementById("fecha").value}T${document.getElementById("horaFin").value}`,
+    start: `${document.getElementById("fecha").value}T${document.getElementById("horaInicio").value}:00-05:00`,
+    end: `${document.getElementById("fecha").value}T${document.getElementById("horaFin").value}:00-05:00`,
     meta: document.getElementById("meta").value,
     participantes: document.getElementById("participantes").value,
     poblacion: document.getElementById("poblacion").value,
@@ -215,6 +215,21 @@ document.getElementById("formActividad").addEventListener("submit", async e => {
 });
 
 // =========================
+// NORMALIZAR Y MOSTRAR HORAS
+// =========================
+function convertirHora(str) {
+  if (!str) return "-";
+  // Si no tiene segundos, los agregamos
+  if (str.length === 16) str += ":00";
+  const fecha = new Date(str);
+  if (isNaN(fecha)) return "-";
+  return fecha.toLocaleTimeString("es-CO", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+// =========================
 // MOSTRAR EVENTOS DEL DÍA
 // =========================
 async function mostrarEventosDelDia(fechaStr) {
@@ -231,14 +246,9 @@ if (eventosDelDia.length === 0) {
     const li = document.createElement("li");
 
     // Formato de horas en Colombia
-    const horaInicio = e.start
-      ? new Date(e.start).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })
-      : "-";
-
-    const horaFin = e.end
-      ? new Date(e.end).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })
-      : "-";
-
+   const horaInicio = convertirHora(e.start);
+const horaFin = convertirHora(e.end);
+    
     li.innerHTML = `
       <b>${e.title}</b><br>
       Responsable: ${e.responsable || "-"}<br>

@@ -4,6 +4,7 @@
 const usuarios = {
   "80772128": { nombre: "Víctor Hugo Huertas Prada", oficina: "Alcaldía Local de Engativá", rol: "admin" },
   "1057581626": { nombre: "Samuel Camacho", oficina: "Área de Gestión de Desarrollo Local", rol: "admin" },
+  "1058843805": { nombre: "Lina Marcela Yepes Salazar", oficina: "Pilar Social", rol: "admin" },
   "1014201517": { nombre: "Daniel Rincón", oficina: " ", rol: "user" },
   "1019004954": { nombre: "Edgar Forero", oficina: "Instancias de Participación", rol: "user" },
   "1052380026": { nombre: "Sandra Tellez", oficina: "Salud", rol: "user" },
@@ -56,6 +57,7 @@ const responsables = {
   "Ambiente": "Fernanda Villamil",
   "Desarrollo Económico": "Cristian Pérez",
   "Área de Gestión de Desarrollo Local": "Samuel Camacho",
+  "Pilar Social": "Lina Marcela Yepes Salazar",
   "Enlace Social": "Fredy Amado",
   "PYBA": "Jheison Barrios",
   "Alcaldía Local de Engativá": "Víctor Hugo Huertas Prada",

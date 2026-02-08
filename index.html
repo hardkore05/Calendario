@@ -352,13 +352,13 @@
   Fecha registro: ${e.fechaRegistro}<br>
   Estado: <b>${e.estado}</b>
   <br>👨‍💼 Alcalde:
-<span style="color:${e.requiereAlcalde === 'SI' ? 'red' : 'black'}">
-  ${e.requiereAlcalde}
+<span style="color:${(e.requiereAlcalde || 'NO') === 'SI' ? 'red' : 'black'}">
+  ${e.requiereAlcalde || 'NO'}
 </span>
 
 <br>📰 Prensa:
-<span style="color:${e.requierePrensa === 'SI' ? 'red' : 'black'}">
-  ${e.requierePrensa}
+<span style="color:${(e.requierePrensa || 'NO') === 'SI' ? 'red' : 'black'}">
+  ${e.requierePrensa || 'NO'}
 </span>
 `;
           if (usuario.rol === "admin") {

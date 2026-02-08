@@ -38,6 +38,8 @@ const EventoSchema = new mongoose.Schema({
   creadoPor: String,
   fechaRegistro: String,
   estado: { type: String, default: "Pendiente" }
+  requiereAlcalde: { type: String, default: "NO" },
+  requierePrensa: { type: String, default: "NO" },
 });
 
 const Evento = mongoose.model("Evento", EventoSchema);

@@ -195,6 +195,8 @@ document.getElementById("formActividad").addEventListener("submit", async e => {
     requerimientos: document.getElementById("requerimientos").value,
     oficina: document.getElementById("oficina").value,
     responsable: document.getElementById("responsable").value,
+    requiereAlcalde: document.getElementById("requiereAlcalde").value,
+    requierePrensa: document.getElementById("requierePrensa").value,
     creadoPor: usuario.nombre,
     fechaRegistro: new Date().toLocaleString("es-CO"),
     estado: "Pendiente"

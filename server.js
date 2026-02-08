@@ -71,7 +71,7 @@ app.post("/api/eventos", async (req, res) => {
   try {
     const nuevoEvento = new Evento(req.body);
     await nuevoEvento.save();
-    res.json({ ok: true, evento: nuevoEvento });
+    res.json(nuevoEvento); // ✅ CLAVE
   } catch (error) {
     console.error("Error al guardar evento:", error);
     res.status(500).json({ error: "Error al guardar evento" });

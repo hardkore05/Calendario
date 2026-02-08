@@ -76,9 +76,14 @@ app.get("/api/eventos", async (req, res) => {
 // 🔹 Guardar nuevo evento
 app.post("/api/eventos", async (req, res) => {
   try {
-    const nuevoEvento = new Evento(req.body);
+    const nuevoEvento = new Evento({
+      ...req.body,
+      requiereAlcalde: req.body.requiereAlcalde || "NO",
+      requierePrensa: req.body.requierePrensa || "NO"
+    });
+
     await nuevoEvento.save();
-    res.status(201).json({ mensaje: "Evento guardado correctamente", evento: nuevoEvento });
+    res.status(201).json(nuevoEvento);
   } catch (err) {
     console.error("❌ Error al guardar evento:", err);
     res.status(500).json({ error: "Error al guardar evento" });

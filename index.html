@@ -351,6 +351,15 @@
   Registrado por: ${e.creadoPor}<br>
   Fecha registro: ${e.fechaRegistro}<br>
   Estado: <b>${e.estado}</b>
+  <br>👨‍💼 Alcalde:
+<span style="color:${e.requiereAlcalde === 'SI' ? 'red' : 'black'}">
+  ${e.requiereAlcalde}
+</span>
+
+<br>📰 Prensa:
+<span style="color:${e.requierePrensa === 'SI' ? 'red' : 'black'}">
+  ${e.requierePrensa}
+</span>
 `;
           if (usuario.rol === "admin") {
             const divBtns = document.createElement("div");

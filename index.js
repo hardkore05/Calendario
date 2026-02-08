@@ -42,7 +42,11 @@ const eventoSchema = new mongoose.Schema({
   responsable: String,
   creadoPor: String,
   fechaRegistro: String,
-  estado: { type: String, default: "Pendiente" }
+  estado: { type: String, default: "Pendiente" },
+
+  // 🔴 CAMPOS QUE FALTABAN
+  requiereAlcalde: { type: String, default: "NO" },
+  requierePrensa: { type: String, default: "NO" }
 });
 
 const Evento = mongoose.model("Evento", eventoSchema, "eventos");

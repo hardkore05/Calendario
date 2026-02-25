@@ -128,8 +128,13 @@ app.get("/api/eventos/excel", async (req, res) => {
     worksheet.columns = [
       { header: "Título", key: "tituloPrincipal", width: 25 },
       { header: "Detalle", key: "tituloDetalle", width: 40 },
-      { header: "Inicio", key: "start", width: 20 },
-      { header: "Fin", key: "end", width: 20 },
+
+      // 🔹 NUEVAS COLUMNAS SEPARADAS
+      { header: "Fecha Inicio", key: "fechaInicio", width: 15 },
+      { header: "Hora Inicio", key: "horaInicio", width: 12 },
+      { header: "Fecha Fin", key: "fechaFin", width: 15 },
+      { header: "Hora Fin", key: "horaFin", width: 12 },
+
       { header: "Meta", key: "meta", width: 20 },
       { header: "Participantes", key: "participantes", width: 15 },
       { header: "Población", key: "poblacion", width: 20 },
@@ -142,35 +147,55 @@ app.get("/api/eventos/excel", async (req, res) => {
 
     eventos.forEach(evento => {
 
-  // 🔹 Dividir el título en dos partes usando "-"
-  let tituloPrincipal = "";
-  let tituloDetalle = "";
+      // 🔹 Dividir el título
+      let tituloPrincipal = "";
+      let tituloDetalle = "";
 
-  if (evento.title && evento.title.includes("-")) {
-    const partes = evento.title.split("-");
-    tituloPrincipal = partes[0].trim();
-    tituloDetalle = partes.slice(1).join("-").trim();
-  } else {
-    tituloPrincipal = evento.title;
-    tituloDetalle = "";
-  }
+      if (evento.title && evento.title.includes("-")) {
+        const partes = evento.title.split("-");
+        tituloPrincipal = partes[0].trim();
+        tituloDetalle = partes.slice(1).join("-").trim();
+      } else {
+        tituloPrincipal = evento.title;
+        tituloDetalle = "";
+      }
 
-  worksheet.addRow({
-    tituloPrincipal,
-    tituloDetalle,
-    start: evento.start,
-    end: evento.end,
-    meta: evento.meta,
-    participantes: evento.participantes,
-    poblacion: evento.poblacion,
-    ubicacion: evento.ubicacion,
-    responsable: evento.responsable,
-    estado: evento.estado,
-    requiereAlcalde: evento.requiereAlcalde,
-    requierePrensa: evento.requierePrensa
-  });
+      // 🔹 Separar fecha y hora inicio
+      let fechaInicio = "";
+      let horaInicio = "";
+      let fechaFin = "";
+      let horaFin = "";
 
-});
+      if (evento.start) {
+        const partesInicio = evento.start.split("T");
+        fechaInicio = partesInicio[0];
+        horaInicio = partesInicio[1] ? partesInicio[1].substring(0,5) : "";
+      }
+
+      if (evento.end) {
+        const partesFin = evento.end.split("T");
+        fechaFin = partesFin[0];
+        horaFin = partesFin[1] ? partesFin[1].substring(0,5) : "";
+      }
+
+      worksheet.addRow({
+        tituloPrincipal,
+        tituloDetalle,
+        fechaInicio,
+        horaInicio,
+        fechaFin,
+        horaFin,
+        meta: evento.meta,
+        participantes: evento.participantes,
+        poblacion: evento.poblacion,
+        ubicacion: evento.ubicacion,
+        responsable: evento.responsable,
+        estado: evento.estado,
+        requiereAlcalde: evento.requiereAlcalde,
+        requierePrensa: evento.requierePrensa
+      });
+
+    });
 
     // Encabezados en negrilla
     worksheet.getRow(1).font = { bold: true };

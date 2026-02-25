@@ -141,20 +141,36 @@ app.get("/api/eventos/excel", async (req, res) => {
     ];
 
     eventos.forEach(evento => {
-      worksheet.addRow({
-        title: evento.title,
-        start: evento.start,
-        end: evento.end,
-        meta: evento.meta,
-        participantes: evento.participantes,
-        poblacion: evento.poblacion,
-        ubicacion: evento.ubicacion,
-        responsable: evento.responsable,
-        estado: evento.estado,
-        requiereAlcalde: evento.requiereAlcalde,
-        requierePrensa: evento.requierePrensa
-      });
-    });
+
+  // 🔹 Dividir el título en dos partes usando "-"
+  let tituloPrincipal = "";
+  let tituloDetalle = "";
+
+  if (evento.title && evento.title.includes("-")) {
+    const partes = evento.title.split("-");
+    tituloPrincipal = partes[0].trim();
+    tituloDetalle = partes.slice(1).join("-").trim();
+  } else {
+    tituloPrincipal = evento.title;
+    tituloDetalle = "";
+  }
+
+  worksheet.addRow({
+    tituloPrincipal,
+    tituloDetalle,
+    start: evento.start,
+    end: evento.end,
+    meta: evento.meta,
+    participantes: evento.participantes,
+    poblacion: evento.poblacion,
+    ubicacion: evento.ubicacion,
+    responsable: evento.responsable,
+    estado: evento.estado,
+    requiereAlcalde: evento.requiereAlcalde,
+    requierePrensa: evento.requierePrensa
+  });
+
+});
 
     // Encabezados en negrilla
     worksheet.getRow(1).font = { bold: true };

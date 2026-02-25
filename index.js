@@ -6,6 +6,7 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const ExcelJS = require("exceljs");
 
 // =========================
 // CONFIGURACIÓN APP
@@ -111,6 +112,68 @@ app.delete("/api/eventos/:id", async (req, res) => {
   } catch (err) {
     console.error("❌ Error al eliminar evento:", err);
     res.status(500).json({ error: "Error al eliminar evento" });
+  }
+});
+
+// =========================
+// EXPORTAR EVENTOS A EXCEL
+// =========================
+app.get("/api/eventos/excel", async (req, res) => {
+  try {
+    const eventos = await Evento.find();
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Eventos");
+
+    worksheet.columns = [
+      { header: "Título", key: "title", width: 25 },
+      { header: "Inicio", key: "start", width: 20 },
+      { header: "Fin", key: "end", width: 20 },
+      { header: "Meta", key: "meta", width: 20 },
+      { header: "Participantes", key: "participantes", width: 15 },
+      { header: "Población", key: "poblacion", width: 20 },
+      { header: "Ubicación", key: "ubicacion", width: 25 },
+      { header: "Responsable", key: "responsable", width: 20 },
+      { header: "Estado", key: "estado", width: 15 },
+      { header: "Alcalde", key: "requiereAlcalde", width: 12 },
+      { header: "Prensa", key: "requierePrensa", width: 12 }
+    ];
+
+    eventos.forEach(evento => {
+      worksheet.addRow({
+        title: evento.title,
+        start: evento.start,
+        end: evento.end,
+        meta: evento.meta,
+        participantes: evento.participantes,
+        poblacion: evento.poblacion,
+        ubicacion: evento.ubicacion,
+        responsable: evento.responsable,
+        estado: evento.estado,
+        requiereAlcalde: evento.requiereAlcalde,
+        requierePrensa: evento.requierePrensa
+      });
+    });
+
+    // Encabezados en negrilla
+    worksheet.getRow(1).font = { bold: true };
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=eventos.xlsx"
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+
+  } catch (error) {
+    console.error("❌ Error al generar Excel:", error);
+    res.status(500).json({ error: "Error al generar Excel" });
   }
 });
 

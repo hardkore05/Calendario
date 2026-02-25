@@ -126,7 +126,8 @@ app.get("/api/eventos/excel", async (req, res) => {
     const worksheet = workbook.addWorksheet("Eventos");
 
     worksheet.columns = [
-      { header: "Título", key: "title", width: 25 },
+      { header: "Título", key: "tituloPrincipal", width: 25 },
+      { header: "Detalle", key: "tituloDetalle", width: 40 },
       { header: "Inicio", key: "start", width: 20 },
       { header: "Fin", key: "end", width: 20 },
       { header: "Meta", key: "meta", width: 20 },

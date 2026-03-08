@@ -373,8 +373,8 @@
 
 li.innerHTML = `
 <label style="display:block;">
-<input type="checkbox" class="eventoCheck" value="${e._id}">
-<span>
+${usuario.rol === "admin" ? `<input type="checkbox" class="eventoCheck" value="${e._id}" style="margin-right:8px;">` : ""}
+
 <b>${e.title}</b><br>
 Responsable: ${e.responsable}<br>
 Meta: ${e.meta || "-"}<br>
@@ -396,7 +396,6 @@ ${e.requiereAlcalde || 'NO'}
 <br>📰 Prensa:
 <span style="color:${(e.requierePrensa || 'NO') === 'SI' ? 'red':'black'}">
 ${e.requierePrensa || 'NO'}
-</span>
 </span>
 </label>
 `;

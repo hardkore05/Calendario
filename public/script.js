@@ -251,11 +251,21 @@ if (eventosDelDia.length === 0) {
   eventosDelDia.forEach(e => {
     const li = document.createElement("li");
 
+    // =========================
+    // CHECKBOX PARA SELECCIÓN
+    // =========================
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "eventoCheck";
+    checkbox.value = e._id;
+
+    li.appendChild(checkbox);
+
     // Formato de horas en Colombia
-   const horaInicio = convertirHora(e.start);
-const horaFin = convertirHora(e.end);
+    const horaInicio = convertirHora(e.start);
+    const horaFin = convertirHora(e.end);
     
-    li.innerHTML = `
+    li.innerHTML += `
       <b>${e.title}</b><br>
       Responsable: ${e.responsable || "-"}<br>
       Meta: ${e.meta || "-"}<br>
@@ -338,4 +348,55 @@ async function eliminarEvento(id) {
 }
 
 
-  
+// =========================
+// SELECCIONAR TODAS
+// =========================
+function seleccionarTodas() {
+  document.querySelectorAll(".eventoCheck").forEach(c => c.checked = true);
+}
+
+// =========================
+// QUITAR SELECCIÓN
+// =========================
+function deseleccionarTodas() {
+  document.querySelectorAll(".eventoCheck").forEach(c => c.checked = false);
+}
+
+// =========================
+// ACEPTAR SELECCIONADAS
+// =========================
+async function aceptarSeleccionadas() {
+
+  const checks = document.querySelectorAll(".eventoCheck:checked");
+
+  for (const check of checks) {
+    await cambiarEstado(check.value, "Aceptado");
+  }
+
+}
+
+// =========================
+// RECHAZAR SELECCIONADAS
+// =========================
+async function rechazarSeleccionadas() {
+
+  const checks = document.querySelectorAll(".eventoCheck:checked");
+
+  for (const check of checks) {
+    await cambiarEstado(check.value, "Rechazado");
+  }
+
+}
+
+// =========================
+// ELIMINAR SELECCIONADAS
+// =========================
+async function eliminarSeleccionadas() {
+
+  const checks = document.querySelectorAll(".eventoCheck:checked");
+
+  for (const check of checks) {
+    await eliminarEvento(check.value);
+  }
+
+}

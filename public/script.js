@@ -240,103 +240,155 @@ function convertirHora(str) {
 // =========================
 async function mostrarEventosDelDia(fechaStr) {
   const lista = document.getElementById("listaEventos");
+
   try {
     const eventos = await cargarEventos();
     const eventosDelDia = eventos.filter(e => e.start && e.start.startsWith(fechaStr));
 
     lista.innerHTML = "";
-if (eventosDelDia.length === 0) {
-  lista.innerHTML = "<li>No hay actividades para este día.</li>";
-} else {
-  eventosDelDia.forEach(e => {
-    const li = document.createElement("li");
 
-    // Formato de horas en Colombia
-    const horaInicio = convertirHora(e.start);
-    const horaFin = convertirHora(e.end);
-    
-    li.innerHTML = `
-      <input type="checkbox" class="eventoCheck" value="${e._id}" style="margin-right:8px;">
+    if (eventosDelDia.length === 0) {
+      lista.innerHTML = "<li>No hay actividades para este día.</li>";
+    } else {
 
-      <b>${e.title}</b><br>
-      Responsable: ${e.responsable || "-"}<br>
-      Meta: ${e.meta || "-"}<br>
-      Participantes: ${e.participantes || "-"}<br>
-      Población: ${e.poblacion || "-"}<br>
-      Ubicación: ${e.ubicacion || "-"}<br>
-      Requerimientos: ${e.requerimientos || "-"}<br>
+      eventosDelDia.forEach(e => {
 
-      ⏰ Hora inicio: ${horaInicio}<br>
-      ⏰ Hora fin: ${horaFin}<br>
+        const li = document.createElement("li");
 
-      Registrado por: ${e.creadoPor || "-"}<br>
-      Fecha registro: ${e.fechaRegistro || "-"}<br>
-      Estado: <b>${e.estado || "-"}</b>
-    `;
+        // =========================
+        // CHECKBOX
+        // =========================
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "eventoCheck";
+        checkbox.value = e._id;
+        checkbox.style.marginRight = "8px";
 
-    if (usuario && usuario.rol === "admin") {
-      const divBtns = document.createElement("div");
-      divBtns.className = "botones-admin";
+        li.appendChild(checkbox);
 
-      const btnAceptar = document.createElement("button");
-      btnAceptar.textContent = "Aceptar";
-      const btnRechazar = document.createElement("button");
-      btnRechazar.textContent = "Rechazar";
-      const btnEliminar = document.createElement("button");
-      btnEliminar.textContent = "Eliminar";
+        // =========================
+        // CONTENIDO
+        // =========================
+        const contenido = document.createElement("div");
 
-      btnAceptar.onclick = () => cambiarEstado(e._id, "Aceptado");
-      btnRechazar.onclick = () => cambiarEstado(e._id, "Rechazado");
-      btnEliminar.onclick = () => eliminarEvento(e._id);
+        const horaInicio = convertirHora(e.start);
+        const horaFin = convertirHora(e.end);
 
-      divBtns.append(btnAceptar, btnRechazar, btnEliminar);
-      li.appendChild(divBtns);
+        contenido.innerHTML = `
+          <b>${e.title}</b><br>
+          Responsable: ${e.responsable || "-"}<br>
+          Meta: ${e.meta || "-"}<br>
+          Participantes: ${e.participantes || "-"}<br>
+          Población: ${e.poblacion || "-"}<br>
+          Ubicación: ${e.ubicacion || "-"}<br>
+          Requerimientos: ${e.requerimientos || "-"}<br>
+
+          ⏰ Hora inicio: ${horaInicio}<br>
+          ⏰ Hora fin: ${horaFin}<br>
+
+          Registrado por: ${e.creadoPor || "-"}<br>
+          Fecha registro: ${e.fechaRegistro || "-"}<br>
+          Estado: <b>${e.estado || "-"}</b>
+        `;
+
+        li.appendChild(contenido);
+
+        // =========================
+        // BOTONES ADMIN
+        // =========================
+        if (usuario && usuario.rol === "admin") {
+
+          const divBtns = document.createElement("div");
+          divBtns.className = "botones-admin";
+
+          const btnAceptar = document.createElement("button");
+          btnAceptar.textContent = "Aceptar";
+
+          const btnRechazar = document.createElement("button");
+          btnRechazar.textContent = "Rechazar";
+
+          const btnEliminar = document.createElement("button");
+          btnEliminar.textContent = "Eliminar";
+
+          btnAceptar.onclick = () => cambiarEstado(e._id, "Aceptado");
+          btnRechazar.onclick = () => cambiarEstado(e._id, "Rechazado");
+          btnEliminar.onclick = () => eliminarEvento(e._id);
+
+          divBtns.append(btnAceptar, btnRechazar, btnEliminar);
+
+          li.appendChild(divBtns);
+        }
+
+        lista.appendChild(li);
+
+      });
+
     }
 
-    lista.appendChild(li);
-  });
-}
     document.getElementById("detalleDia").classList.remove("oculto");
+
   } catch (err) {
     console.error(err);
     lista.innerHTML = "<li>Error cargando actividades.</li>";
   }
 }
 
+
 // =========================
 // CAMBIAR ESTADO
 // =========================
 async function cambiarEstado(id, nuevoEstado) {
+
   if (!confirm(`¿Deseas marcar este evento como ${nuevoEstado}?`)) return;
+
   try {
+
     const res = await fetch(`/api/eventos/${id}/estado`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ estado: nuevoEstado })
     });
+
     if (!res.ok) throw new Error("Error actualizando estado");
+
     alert(`✅ Actividad ${nuevoEstado}`);
+
     await cargarEventos();
+
   } catch (err) {
+
     console.error(err);
     alert("❌ Error al actualizar estado");
+
   }
+
 }
+
 
 // =========================
 // ELIMINAR EVENTO
 // =========================
 async function eliminarEvento(id) {
+
   if (!confirm("¿Deseas eliminar este evento?")) return;
+
   try {
+
     const res = await fetch(`/api/eventos/${id}`, { method: "DELETE" });
+
     if (!res.ok) throw new Error("Error eliminando evento");
+
     alert("🗑️ Evento eliminado");
+
     await cargarEventos();
+
   } catch (err) {
+
     console.error(err);
     alert("❌ Error al eliminar evento");
+
   }
+
 }
 
 
@@ -344,15 +396,21 @@ async function eliminarEvento(id) {
 // SELECCIONAR TODAS
 // =========================
 function seleccionarTodas() {
+
   document.querySelectorAll(".eventoCheck").forEach(c => c.checked = true);
+
 }
+
 
 // =========================
 // QUITAR SELECCIÓN
 // =========================
 function deseleccionarTodas() {
+
   document.querySelectorAll(".eventoCheck").forEach(c => c.checked = false);
+
 }
+
 
 // =========================
 // ACEPTAR SELECCIONADAS
@@ -362,10 +420,13 @@ async function aceptarSeleccionadas() {
   const checks = document.querySelectorAll(".eventoCheck:checked");
 
   for (const check of checks) {
+
     await cambiarEstado(check.value, "Aceptado");
+
   }
 
 }
+
 
 // =========================
 // RECHAZAR SELECCIONADAS
@@ -375,10 +436,13 @@ async function rechazarSeleccionadas() {
   const checks = document.querySelectorAll(".eventoCheck:checked");
 
   for (const check of checks) {
+
     await cambiarEstado(check.value, "Rechazado");
+
   }
 
 }
+
 
 // =========================
 // ELIMINAR SELECCIONADAS
@@ -388,7 +452,9 @@ async function eliminarSeleccionadas() {
   const checks = document.querySelectorAll(".eventoCheck:checked");
 
   for (const check of checks) {
+
     await eliminarEvento(check.value);
+
   }
 
 }

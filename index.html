@@ -443,6 +443,35 @@ ${e.requierePrensa || 'NO'}
         cargarEventos();
       }
     }
+
+    function seleccionarTodas(){
+  document.querySelectorAll(".eventoCheck").forEach(c => c.checked = true);
+}
+
+function deseleccionarTodas(){
+  document.querySelectorAll(".eventoCheck").forEach(c => c.checked = false);
+}
+
+async function aceptarSeleccionadas(){
+  const checks = document.querySelectorAll(".eventoCheck:checked");
+  for(const c of checks){
+    await cambiarEstado(c.value,"Aceptado");
+  }
+}
+
+async function rechazarSeleccionadas(){
+  const checks = document.querySelectorAll(".eventoCheck:checked");
+  for(const c of checks){
+    await cambiarEstado(c.value,"Rechazado");
+  }
+}
+
+async function eliminarSeleccionadas(){
+  const checks = document.querySelectorAll(".eventoCheck:checked");
+  for(const c of checks){
+    await eliminarEvento(c.value);
+  }
+}
   </script>
 </body>
 </html>

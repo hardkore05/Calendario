@@ -251,9 +251,15 @@
       usuario = usuarios[cedula];
 
       if (usuario) {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("app").style.display = "block";
-        document.querySelector("header h1").textContent = `Bienvenido, ${usuario.nombre}`;
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.querySelector("header h1").textContent = `Bienvenido, ${usuario.nombre}`;
+
+  // ocultar botones si no es admin
+  if (usuario.rol !== "admin") {
+    document.getElementById("botonesAdmin").style.display = "none";
+  }
+}
       } else {
         document.getElementById("error").textContent = "Cédula no autorizada.";
       }

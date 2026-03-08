@@ -471,15 +471,13 @@ ${e.requierePrensa || 'NO'}
       }
     }
 
-    function seleccionarTodas(){
-  document.querySelectorAll(".eventoCheck").forEach(c => c.checked = true);
-}
-
-function deseleccionarTodas(){
+    function deseleccionarTodas(){
+  if(usuario.rol !== "admin") return;
   document.querySelectorAll(".eventoCheck").forEach(c => c.checked = false);
 }
 
 async function aceptarSeleccionadas(){
+  if(usuario.rol !== "admin") return;
   const checks = document.querySelectorAll(".eventoCheck:checked");
   for(const c of checks){
     await cambiarEstado(c.value,"Aceptado");
@@ -487,6 +485,7 @@ async function aceptarSeleccionadas(){
 }
 
 async function rechazarSeleccionadas(){
+  if(usuario.rol !== "admin") return;
   const checks = document.querySelectorAll(".eventoCheck:checked");
   for(const c of checks){
     await cambiarEstado(c.value,"Rechazado");
@@ -494,6 +493,7 @@ async function rechazarSeleccionadas(){
 }
 
 async function eliminarSeleccionadas(){
+  if(usuario.rol !== "admin") return;
   const checks = document.querySelectorAll(".eventoCheck:checked");
   for(const c of checks){
     await eliminarEvento(c.value);

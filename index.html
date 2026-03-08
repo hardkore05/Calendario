@@ -347,27 +347,30 @@
       } else {
         eventos.forEach(e => {
           const li = document.createElement("li");
-          li.innerHTML = `
-  <b>${e.title}</b><br>
-  Responsable: ${e.responsable}<br>
-  Meta: ${e.meta || "-"}<br>
-  Participantes: ${e.participantes || "-"}<br>
-  Población: ${e.poblacion || "-"}<br>
-  Ubicación: ${e.ubicacion || "-"}<br>
-  Requerimientos: ${e.requerimientos || "-"}<br>
-  Hora inicio: ${new Date(e.start).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}<br>
-  Hora fin: ${new Date(e.end).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}<br>
-  Registrado por: ${e.creadoPor}<br>
-  Fecha registro: ${e.fechaRegistro}<br>
-  Estado: <b>${e.estado}</b>
-  <br>👨‍💼 Alcalde:
+li.innerHTML = `
+<input type="checkbox" class="eventoCheck" value="${e._id}" style="margin-right:8px;">
+
+<b>${e.title}</b><br>
+Responsable: ${e.responsable}<br>
+Meta: ${e.meta || "-"}<br>
+Participantes: ${e.participantes || "-"}<br>
+Población: ${e.poblacion || "-"}<br>
+Ubicación: ${e.ubicacion || "-"}<br>
+Requerimientos: ${e.requerimientos || "-"}<br>
+Hora inicio: ${new Date(e.start).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}<br>
+Hora fin: ${new Date(e.end).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}<br>
+Registrado por: ${e.creadoPor}<br>
+Fecha registro: ${e.fechaRegistro}<br>
+Estado: <b>${e.estado}</b>
+
+<br>👨‍💼 Alcalde:
 <span style="color:${(e.requiereAlcalde || 'NO') === 'SI' ? 'red' : 'black'}">
-  ${e.requiereAlcalde || 'NO'}
+${e.requiereAlcalde || 'NO'}
 </span>
 
 <br>📰 Prensa:
 <span style="color:${(e.requierePrensa || 'NO') === 'SI' ? 'red' : 'black'}">
-  ${e.requierePrensa || 'NO'}
+${e.requierePrensa || 'NO'}
 </span>
 `;
           if (usuario.rol === "admin") {

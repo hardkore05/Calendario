@@ -251,21 +251,13 @@ if (eventosDelDia.length === 0) {
   eventosDelDia.forEach(e => {
     const li = document.createElement("li");
 
-    // =========================
-    // CHECKBOX PARA SELECCIÓN
-    // =========================
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.className = "eventoCheck";
-    checkbox.value = e._id;
-
-    li.appendChild(checkbox);
-
     // Formato de horas en Colombia
     const horaInicio = convertirHora(e.start);
     const horaFin = convertirHora(e.end);
     
-    li.innerHTML += `
+    li.innerHTML = `
+      <input type="checkbox" class="eventoCheck" value="${e._id}" style="margin-right:8px;">
+
       <b>${e.title}</b><br>
       Responsable: ${e.responsable || "-"}<br>
       Meta: ${e.meta || "-"}<br>

@@ -337,9 +337,11 @@ async function mostrarEventosDelDia(fechaStr) {
 // =========================
 // CAMBIAR ESTADO
 // =========================
-async function cambiarEstado(id, nuevoEstado) {
+async function cambiarEstado(id, nuevoEstado, mostrarConfirm = true) {
 
-  if (!confirm(`¿Deseas marcar este evento como ${nuevoEstado}?`)) return;
+  if (mostrarConfirm) {
+    if (!confirm(`¿Deseas marcar este evento como ${nuevoEstado}?`)) return;
+  }
 
   try {
 
@@ -351,15 +353,15 @@ async function cambiarEstado(id, nuevoEstado) {
 
     if (!res.ok) throw new Error("Error actualizando estado");
 
-    alert(`✅ Actividad ${nuevoEstado}`);
-
-    await cargarEventos();
+    // Solo alert y recarga si es individual
+    if (mostrarConfirm) {
+      alert(`✅ Actividad ${nuevoEstado}`);
+      await cargarEventos();
+    }
 
   } catch (err) {
-
     console.error(err);
     alert("❌ Error al actualizar estado");
-
   }
 
 }
@@ -368,9 +370,11 @@ async function cambiarEstado(id, nuevoEstado) {
 // =========================
 // ELIMINAR EVENTO
 // =========================
-async function eliminarEvento(id) {
+async function eliminarEvento(id, mostrarConfirm = true) {
 
-  if (!confirm("¿Deseas eliminar este evento?")) return;
+  if (mostrarConfirm) {
+    if (!confirm("¿Deseas eliminar este evento?")) return;
+  }
 
   try {
 
@@ -378,15 +382,14 @@ async function eliminarEvento(id) {
 
     if (!res.ok) throw new Error("Error eliminando evento");
 
-    alert("🗑️ Evento eliminado");
-
-    await cargarEventos();
+    if (mostrarConfirm) {
+      alert("🗑️ Evento eliminado");
+      await cargarEventos();
+    }
 
   } catch (err) {
-
     console.error(err);
     alert("❌ Error al eliminar evento");
-
   }
 
 }
@@ -396,9 +399,7 @@ async function eliminarEvento(id) {
 // SELECCIONAR TODAS
 // =========================
 function seleccionarTodas() {
-
   document.querySelectorAll(".eventoCheck").forEach(c => c.checked = true);
-
 }
 
 
@@ -406,9 +407,7 @@ function seleccionarTodas() {
 // QUITAR SELECCIÓN
 // =========================
 function deseleccionarTodas() {
-
   document.querySelectorAll(".eventoCheck").forEach(c => c.checked = false);
-
 }
 
 
@@ -419,10 +418,27 @@ async function aceptarSeleccionadas() {
 
   const checks = document.querySelectorAll(".eventoCheck:checked");
 
-  for (const check of checks) {
+  if (checks.length === 0) {
+    alert("No hay actividades seleccionadas");
+    return;
+  }
 
-    await cambiarEstado(check.value, "Aceptado");
+  if (!confirm(`¿Aceptar ${checks.length} actividades?`)) return;
 
+  try {
+
+    await Promise.all(
+      Array.from(checks).map(check =>
+        cambiarEstado(check.value, "Aceptado", false)
+      )
+    );
+
+    alert("✅ Actividades aceptadas correctamente");
+    await cargarEventos();
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error en el proceso");
   }
 
 }
@@ -435,10 +451,27 @@ async function rechazarSeleccionadas() {
 
   const checks = document.querySelectorAll(".eventoCheck:checked");
 
-  for (const check of checks) {
+  if (checks.length === 0) {
+    alert("No hay actividades seleccionadas");
+    return;
+  }
 
-    await cambiarEstado(check.value, "Rechazado");
+  if (!confirm(`¿Rechazar ${checks.length} actividades?`)) return;
 
+  try {
+
+    await Promise.all(
+      Array.from(checks).map(check =>
+        cambiarEstado(check.value, "Rechazado", false)
+      )
+    );
+
+    alert("❌ Actividades rechazadas");
+    await cargarEventos();
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error en el proceso");
   }
 
 }
@@ -451,10 +484,27 @@ async function eliminarSeleccionadas() {
 
   const checks = document.querySelectorAll(".eventoCheck:checked");
 
-  for (const check of checks) {
+  if (checks.length === 0) {
+    alert("No hay actividades seleccionadas");
+    return;
+  }
 
-    await eliminarEvento(check.value);
+  if (!confirm(`¿Eliminar ${checks.length} actividades?`)) return;
 
+  try {
+
+    await Promise.all(
+      Array.from(checks).map(check =>
+        eliminarEvento(check.value, false)
+      )
+    );
+
+    alert("🗑️ Actividades eliminadas");
+    await cargarEventos();
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error en el proceso");
   }
 
 }

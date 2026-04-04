@@ -430,22 +430,23 @@ ${e.requierePrensa || 'NO'}
       document.getElementById("detalleDia").classList.remove("oculto");
     }
 
-    // =========================
-    // FUNCIONES AUXILIARES (BACKEND)
-    // =========================
-    async function cargarEventos() {
-      const res = await fetch("/api/eventos");
-      const eventos = await res.json();
-      calendar.removeAllEvents();
-      eventos.forEach(e => calendar.addEvent({
-        id: e._id,
-        title: e.title,
-        start: e.start,
-        end: e.end,
-        extendedProps: e
-      }));
-    }
-    async function cambiarEstado(id, nuevoEstado) {
+// =========================
+// FUNCIONES AUXILIARES (BACKEND)
+// =========================
+async function cargarEventos() {
+  const res = await fetch("/api/eventos");
+  const eventos = await res.json();
+  calendar.removeAllEvents();
+  eventos.forEach(e => calendar.addEvent({
+    id: e._id,
+    title: e.title,
+    start: e.start,
+    end: e.end,
+    extendedProps: e
+  }));
+}
+
+async function cambiarEstado(id, nuevoEstado) {
   const res = await fetch(`/api/eventos/${id}/estado`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -460,16 +461,25 @@ ${e.requierePrensa || 'NO'}
     alert("Error actualizando estado");
   }
 }
-    async function eliminarEvento(id) {
-      if (!confirm("¿Desea eliminar esta actividad?")) return;
-      const res = await fetch(`/api/eventos/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        alert("Actividad eliminada");
-        cargarEventos();
-      }
-    }
 
-    function deseleccionarTodas(){
+async function eliminarEvento(id) {
+  if (!confirm("¿Desea eliminar esta actividad?")) return;
+  const res = await fetch(`/api/eventos/${id}`, { method: "DELETE" });
+  if (res.ok) {
+    alert("Actividad eliminada");
+    cargarEventos();
+  }
+}
+
+/* =========================
+   NUEVA FUNCIÓN AGREGADA
+========================= */
+function seleccionarTodas(){
+  if(usuario.rol !== "admin") return;
+  document.querySelectorAll(".eventoCheck").forEach(c => c.checked = true);
+}
+
+function deseleccionarTodas(){
   if(usuario.rol !== "admin") return;
   document.querySelectorAll(".eventoCheck").forEach(c => c.checked = false);
 }

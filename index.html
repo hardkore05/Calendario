@@ -446,34 +446,59 @@ async function cargarEventos() {
   }));
 }
 
-async function cambiarEstado(id, nuevoEstado) {
+// =========================
+// CAMBIAR ESTADO (CORREGIDO)
+// =========================
+async function cambiarEstado(id, nuevoEstado, mostrarConfirm = true) {
+
+  if (mostrarConfirm) {
+    if (!confirm(`¿Deseas marcar este evento como ${nuevoEstado}?`)) return;
+  }
+
   const res = await fetch(`/api/eventos/${id}/estado`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ estado: nuevoEstado, evaluado: true })
   });
 
-  if (res.ok) {
+  if (!res.ok) {
+    alert("Error actualizando estado");
+    return;
+  }
+
+  // 🔥 SOLO si es individual
+  if (mostrarConfirm) {
     alert(`Actividad ${nuevoEstado}`);
     await cargarEventos();
     document.getElementById("detalleDia").classList.add("oculto");
-  } else {
-    alert("Error actualizando estado");
   }
 }
 
-async function eliminarEvento(id) {
-  if (!confirm("¿Desea eliminar esta actividad?")) return;
+// =========================
+// ELIMINAR EVENTO (CORREGIDO)
+// =========================
+async function eliminarEvento(id, mostrarConfirm = true) {
+
+  if (mostrarConfirm) {
+    if (!confirm("¿Desea eliminar esta actividad?")) return;
+  }
+
   const res = await fetch(`/api/eventos/${id}`, { method: "DELETE" });
-  if (res.ok) {
+
+  if (!res.ok) {
+    alert("Error eliminando actividad");
+    return;
+  }
+
+  if (mostrarConfirm) {
     alert("Actividad eliminada");
-    cargarEventos();
+    await cargarEventos();
   }
 }
 
-/* =========================
-   NUEVA FUNCIÓN AGREGADA
-========================= */
+// =========================
+// SELECCIÓN
+// =========================
 function seleccionarTodas(){
   if(usuario.rol !== "admin") return;
   document.querySelectorAll(".eventoCheck").forEach(c => c.checked = true);
@@ -484,28 +509,82 @@ function deseleccionarTodas(){
   document.querySelectorAll(".eventoCheck").forEach(c => c.checked = false);
 }
 
+// =========================
+// ACEPTAR SELECCIONADAS (CORREGIDO)
+// =========================
 async function aceptarSeleccionadas(){
+
   if(usuario.rol !== "admin") return;
+
   const checks = document.querySelectorAll(".eventoCheck:checked");
-  for(const c of checks){
-    await cambiarEstado(c.value,"Aceptado");
+
+  if(checks.length === 0){
+    alert("No hay actividades seleccionadas");
+    return;
   }
+
+  if(!confirm(`¿Aceptar ${checks.length} actividades?`)) return;
+
+  await Promise.all(
+    Array.from(checks).map(c =>
+      cambiarEstado(c.value,"Aceptado", false)
+    )
+  );
+
+  alert("✅ Actividades aceptadas");
+  await cargarEventos();
 }
 
+// =========================
+// RECHAZAR SELECCIONADAS (CORREGIDO)
+// =========================
 async function rechazarSeleccionadas(){
+
   if(usuario.rol !== "admin") return;
+
   const checks = document.querySelectorAll(".eventoCheck:checked");
-  for(const c of checks){
-    await cambiarEstado(c.value,"Rechazado");
+
+  if(checks.length === 0){
+    alert("No hay actividades seleccionadas");
+    return;
   }
+
+  if(!confirm(`¿Rechazar ${checks.length} actividades?`)) return;
+
+  await Promise.all(
+    Array.from(checks).map(c =>
+      cambiarEstado(c.value,"Rechazado", false)
+    )
+  );
+
+  alert("❌ Actividades rechazadas");
+  await cargarEventos();
 }
 
+// =========================
+// ELIMINAR SELECCIONADAS (CORREGIDO)
+// =========================
 async function eliminarSeleccionadas(){
+
   if(usuario.rol !== "admin") return;
+
   const checks = document.querySelectorAll(".eventoCheck:checked");
-  for(const c of checks){
-    await eliminarEvento(c.value);
+
+  if(checks.length === 0){
+    alert("No hay actividades seleccionadas");
+    return;
   }
+
+  if(!confirm(`¿Eliminar ${checks.length} actividades?`)) return;
+
+  await Promise.all(
+    Array.from(checks).map(c =>
+      eliminarEvento(c.value, false)
+    )
+  );
+
+  alert("🗑️ Actividades eliminadas");
+  await cargarEventos();
 }
   </script>
 </body>

@@ -233,7 +233,7 @@
       "52046781": { nombre: "Deisy Villalba", oficina: "Subsidio Bono C", rol: "user" },
       "1014288855": { nombre: "Alejandra Bermudez", oficina: "Casa Mujer Respiro", rol: "user" },
       "1015405783": { nombre: "Leandro Ariza", oficina: "Casa del Adulto Mayor", rol: "user" },
-      "1022371847": { nombre: "Adriana Lorena Herrera Deaza", oficina: "Casa del Adulto Mayor", rol: "user" }
+      "1022371847": { nombre: "Adriana Lorena Herrera Deaza", oficina: "Casa del Adulto Mayor", rol: "user" },
       "79880521": { nombre: "Nicolás Rodríguez", oficina: "Cultura y Deporte", rol: "user" },
       "1014264461": { nombre: "Fernanda Villamil", oficina: "Ambiente", rol: "user" },
       "5660739": { nombre: "Cristian Pérez", oficina: "Desarrollo Económico", rol: "user" },
@@ -295,8 +295,14 @@
     };
 
     document.getElementById("oficina").addEventListener("change", e => {
-      document.getElementById("responsable").value = responsables[e.target.value] || "";
-    });
+  const valor = responsables[e.target.value];
+
+  if (Array.isArray(valor)) {
+    document.getElementById("responsable").value = valor.join(", ");
+  } else {
+    document.getElementById("responsable").value = valor || "";
+  }
+});
 
     // =========================
     // INICIALIZAR CALENDARIO

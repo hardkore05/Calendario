@@ -68,7 +68,13 @@ const responsables = {
 };
 
 document.getElementById("oficina").addEventListener("change", e => {
-  document.getElementById("responsable").value = responsables[e.target.value] || "";
+  const valor = responsables[e.target.value];
+
+  if (Array.isArray(valor)) {
+    document.getElementById("responsable").value = valor.join(", ");
+  } else {
+    document.getElementById("responsable").value = valor || "";
+  }
 });
 
 // =========================

@@ -221,26 +221,27 @@
     // =========================
     // USUARIOS AUTORIZADOS
     // =========================
-    const usuarios = {
-      "80772128": { nombre: "Víctor Hugo Huertas Prada", oficina: "Alcaldía Local de Engativá", rol: "admin" },
-      "1057581626": { nombre: "Samuel Camacho", oficina: "Área de Gestión de Desarrollo Local", rol: "admin" },
-      "1058843805": { nombre: "Lina Marcela Yepes Salazar", oficina: "Pilar Social", rol: "admin" },
-      "1014201517": { nombre: "Daniel Rincón", oficina: " ", rol: "user" },
-      "1010231834": { nombre: "Sergio Mosquera", oficina: "Casa Afro", rol: "user" },
-      "1019004954": { nombre: "Edgar Forero", oficina: "Instancias de Participación", rol: "user" },
-      "1052380026": { nombre: "Sandra Tellez", oficina: "Salud", rol: "user" },
-      "1032506186": { nombre: "Alexandra Bueno", oficina: "Educación", rol: "user" },
-      "52046781": { nombre: "Deisy Villalba", oficina: "Subsidio Bono C", rol: "user" },
-      "1014288855": { nombre: "Alejandra Bermudez", oficina: "Casa Mujer Respiro", rol: "user" },
-      "1015405783": { nombre: "Leandro Ariza", oficina: "Casa del Adulto Mayor", rol: "user" },
-      "1022371847": { nombre: "Adriana Lorena Herrera Deaza", oficina: "Casa del Adulto Mayor", rol: "user" },
-      "79880521": { nombre: "Nicolás Rodríguez", oficina: "Cultura y Deporte", rol: "user" },
-      "1014264461": { nombre: "Fernanda Villamil", oficina: "Ambiente", rol: "user" },
-      "5660739": { nombre: "Cristian Pérez", oficina: "Desarrollo Económico", rol: "user" },
-      "80017445": { nombre: "Fredy Amado", oficina: "Enlace Social", rol: "user" },
-      "79803436": { nombre: "Jheison Barrios", oficina: "PYBA", rol: "user" },
-      "1026285569": { nombre: "Paula Salgado", oficina: "Enlace de Participación", rol: "user" }
-    };
+const usuarios = {
+  "48217": { nombre: "Alcaldía Local de Engativá", oficina: "Alcaldía Local de Engativá", rol: "admin" },
+  "73105": { nombre: "Área de Gestión de Desarrollo Local", oficina: "Área de Gestión de Desarrollo Local", rol: "admin" },
+  "26493": { nombre: "Pilar Social", oficina: "Pilar Social", rol: "admin" },
+  "51842": { nombre: " ", oficina: " ", rol: "user" },
+  "93671": { nombre: "Casa Afro", oficina: "Casa Afro", rol: "user" },
+  "40726": { nombre: "Instancias de Participación", oficina: "Instancias de Participación", rol: "user" },
+  "65218": { nombre: "Salud", oficina: "Salud", rol: "user" },
+  "18395": { nombre: "Educación", oficina: "Educación", rol: "user" },
+  "82460": { nombre: "Subsidio Bono C", oficina: "Subsidio Bono C", rol: "user" },
+  "37514": { nombre: "Casa Mujer Respiro", oficina: "Casa Mujer Respiro", rol: "user" },
+  "60937": { nombre: "Casa del Adulto Mayor", oficina: "Casa del Adulto Mayor", rol: "user" },
+  "94152": { nombre: "Casa del Adulto Mayor", oficina: "Casa del Adulto Mayor", rol: "user" },
+  "21684": { nombre: "Cultura y Deporte", oficina: "Cultura y Deporte", rol: "user" },
+  "75309": { nombre: "Ambiente", oficina: "Ambiente", rol: "user" },
+  "42861": { nombre: "Desarrollo Económico", oficina: "Desarrollo Económico", rol: "user" },
+  "89534": { nombre: "Enlace Social", oficina: "Enlace Social", rol: "user" },
+  "16275": { nombre: "PYBA", oficina: "PYBA", rol: "user" },
+  "53708": { nombre: "Enlace de Participación", oficina: "Enlace de Participación", rol: "user" },
+  "68421": { nombre: "Apoyo a la Supervisión", oficina: "Apoyo a la Supervisión", rol: "user" }
+};
 
     let usuario = null;
 
@@ -275,24 +276,25 @@
     // =========================
     // RESPONSABLES DE OFICINA
     // =========================
-    const responsables = {
-      "Instancias de Participación": "Edgar Forero",
-      "Salud": "Sandra Tellez",
-      "Educación": "Alexandra Bueno",
-      "Casa Afro": "Sergio Mosquera",
-      "Subsidio Bono C": "Deisy Villalba",
-      "Casa Mujer Respiro": "Alejandra Bermudez",
-      "Casa del Adulto Mayor": ["Leandro Ariza", "Adriana Lorena Herrera Deaza"],
-      "Cultura y Deporte": "Nicolás Rodríguez",
-      "Ambiente": "Fernanda Villamil",
-      "Desarrollo Económico": "Cristian Pérez",
-      "Área de Gestión de Desarrollo Local": "Samuel Camacho",
-      "Enlace Social": "Fredy Amado",
-      "PYBA": "Jheison Barrios",
-      "Alcaldía Local de Engativá": "Víctor Hugo Huertas Prada",
-      "Pilar Social": "Lina Marcela Yepes Salazar",
-      "Enlace de Participación": "Paula Salgado"
-    };
+const responsables = {
+  "Instancias de Participación": "Instancias de Participación",
+  "Salud": "Salud",
+  "Educación": "Educación",
+  "Casa Afro": "Casa Afro",
+  "Subsidio Bono C": "Subsidio Bono C",
+  "Casa Mujer Respiro": "Casa Mujer Respiro",
+  "Casa del Adulto Mayor": ["Casa del Adulto Mayor", "Casa del Adulto Mayor"],
+  "Cultura y Deporte": "Cultura y Deporte",
+  "Ambiente": "Ambiente",
+  "Desarrollo Económico": "Desarrollo Económico",
+  "Área de Gestión de Desarrollo Local": "Área de Gestión de Desarrollo Local",
+  "Enlace Social": "Enlace Social",
+  "PYBA": "PYBA",
+  "Alcaldía Local de Engativá": "Alcaldía Local de Engativá",
+  "Pilar Social": "Pilar Social",
+  "Enlace de Participación": "Enlace de Participación",
+  "Apoyo a la Supervisión": "Apoyo a la Supervisión"
+};
 
     document.getElementById("oficina").addEventListener("change", e => {
   const valor = responsables[e.target.value];
